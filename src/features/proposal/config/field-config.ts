@@ -1,7 +1,35 @@
 import { ParcelCategory, CoverageType, RiderOption } from '../types';
 
-// Configuration for Policyholder Info fields
-export const policyholderInfoConfig = {
+/**
+ * Field Configuration for the Proposal Feature
+ * 
+ * This configuration defines the UI properties for each field in the proposal forms.
+ * It provides a centralized way to manage field labels, placeholders, validation rules,
+ * and other UI-related properties.
+ * 
+ * While the current implementation doesn't directly use these configurations in the
+ * form components, they serve as a reference for developers and could be integrated
+ * with a form generator in the future.
+ * 
+ * Potential uses:
+ * 1. Generate dynamic forms based on configuration
+ * 2. Provide consistent field properties across the application
+ * 3. Enable admin-configurable forms without code changes
+ * 4. Support internationalization of form labels and messages
+ * 
+ * Each field configuration includes:
+ * - id: Field identifier matching the property name in the data model
+ * - label: Display label for the field
+ * - type: Input type (text, number, select, etc.)
+ * - placeholder: Placeholder text
+ * - required: Whether the field is required
+ * - validation: Validation rules matching Zod schema requirements
+ */
+
+// Configuration object for the entire proposal form
+const proposalFieldConfig = {
+  // Configuration for Policyholder Info fields
+  policyholderInfo: {
   fields: [
     {
       id: 'fullName',
@@ -63,10 +91,10 @@ export const policyholderInfoConfig = {
       rows: 3,
     },
   ],
-};
+},
 
-// Configuration for Parcel Details fields
-export const parcelDetailsConfig = {
+  // Configuration for Parcel Details fields
+  parcelDetails: {
   fields: [
     {
       id: 'description',
@@ -165,10 +193,10 @@ export const parcelDetailsConfig = {
       required: false,
     },
   ],
-};
+},
 
-// Configuration for Shipping & Coverage fields
-export const shippingCoverageConfig = {
+  // Configuration for Shipping & Coverage fields
+  shippingCoverage: {
   fields: [
     {
       id: 'origin',
@@ -242,10 +270,10 @@ export const shippingCoverageConfig = {
       ] as RiderOption[],
     },
   ],
-};
+},
 
-// Configuration for Premium Calculation fields
-export const premiumCalculationConfig = {
+  // Configuration for Premium Calculation fields
+  premiumCalculation: {
   fields: [
     {
       id: 'proposalNo',
@@ -285,10 +313,10 @@ export const premiumCalculationConfig = {
       helpText: 'Enter a valid discount code to receive a premium reduction',
     },
   ],
-};
+},
 
-// Configuration for Documents & Consent fields
-export const documentsConsentConfig = {
+  // Configuration for Documents & Consent fields
+  documentsConsent: {
   fields: [
     {
       id: 'identityDoc',
@@ -338,4 +366,7 @@ export const documentsConsentConfig = {
       helpText: 'I confirm that all information provided in this proposal is accurate and complete. I understand that providing false information may result in claim denial or policy cancellation.',
     },
   ],
+}
 };
+
+export default proposalFieldConfig;

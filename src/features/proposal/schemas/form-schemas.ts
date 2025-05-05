@@ -87,15 +87,6 @@ export const documentsConsentSchema = z.object({
   confirmAccuracy: z.boolean().refine((val) => val === true, "You must confirm accuracy"),
 });
 
-// Complete proposal schema
-export const parcelInsuranceProposalSchema = z.object({
-  policyholderInfo: policyholderInfoSchema,
-  parcelDetails: parcelDetailsSchema,
-  shippingCoverage: shippingCoverageSchema,
-  premiumCalculation: premiumCalculationSchema,
-  documentsConsent: documentsConsentSchema,
-});
-
 // For form validation in stepper
 export const stepperSchemas = {
   policyholderInfo: policyholderInfoSchema,

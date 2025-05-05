@@ -1,4 +1,10 @@
-import { ParcelDetails, ShippingCoverage } from "../types";
+import { ParcelDetails, ParcelInsuranceProposal, ShippingCoverage } from '../types';
+
+// Define types for local storage operations
+interface StoredProposal extends ParcelInsuranceProposal {
+  createdAt: string;
+  id: string;
+}
 
 /**
  * Generates a proposal number in the format FNI+year+month+day+nrc number
@@ -9,11 +15,11 @@ export const generateProposalNumber = (nrcNumber: string): string => {
   const date = new Date();
   const year = date.getFullYear().toString();
   // Ensure month and day are 2 digits
-  const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
   
   // Extract only numeric part of NRC number for the proposal number
-  const numericNrc = nrcNumber.replace(/[^0-9]/g, "");
+  const numericNrc = nrcNumber.replace(/[^0-9]/g, '');
   
   return `FNI${year}${month}${day}${numericNrc}`;
 };
@@ -28,19 +34,19 @@ export const calculateBasePremium = (
   declaredValue: number,
   coverageType: string
 ): number => {
-  let rate = 0;
+  let rate: number;
   
   switch (coverageType) {
-    case "Basic":
+    case 'Basic':
       rate = 0.02; // 2% of declared value
       break;
-    case "Standard":
+    case 'Standard':
       rate = 0.035; // 3.5% of declared value
       break;
-    case "Premium":
+    case 'Premium':
       rate = 0.05; // 5% of declared value
       break;
-    case "Custom":
+    case 'Custom':
       rate = 0.045; // 4.5% of declared value
       break;
     default:
@@ -64,13 +70,13 @@ export const calculateRiskLoad = (parcelDetails: ParcelDetails): number => {
   
   // Category-based risk factors
   switch (parcelDetails.category) {
-    case "Electronics":
+    case 'Electronics':
       riskFactor += 0.015;
       break;
-    case "Fragile":
+    case 'Fragile':
       riskFactor += 0.025;
       break;
-    case "Perishable":
+    case 'Perishable':
       riskFactor += 0.02;
       break;
     default:
@@ -97,8 +103,8 @@ export const calculateTotalPremium = (
   // Apply discount if valid code is provided
   if (discountCode) {
     // This would typically check against a database of valid codes
-    // For now, we'll just check if it starts with "DISCOUNT"
-    if (discountCode.startsWith("DISCOUNT")) {
+    // For now, we'll just check if it starts with 'DISCOUNT'
+    if (discountCode.startsWith('DISCOUNT')) {
       total = total * 0.9; // 10% discount
     }
   }
@@ -117,7 +123,11 @@ export const calculatePremium = (
   parcelDetails: ParcelDetails,
   shippingCoverage: ShippingCoverage,
   discountCode?: string
-) => {
+): {
+  basePremium: number;
+  riskLoad: number;
+  totalPremium: number;
+} => {
   const basePremium = calculateBasePremium(
     parcelDetails.declaredValue,
     shippingCoverage.coverageType
@@ -141,16 +151,17 @@ export const calculatePremium = (
 /**
  * Saves the proposal data to local storage
  * @param proposalData The complete proposal data
+ * @returns The ID of the saved proposal
  */
-export const saveProposalToLocalStorage = (proposalData: any) => {
+export const saveProposalToLocalStorage = (proposalData: ParcelInsuranceProposal): string => {
   try {
     // Get existing proposals or initialize empty array
     const existingProposals = JSON.parse(
-      localStorage.getItem("parcelInsuranceProposals") || "[]"
-    );
+      localStorage.getItem('parcelInsuranceProposals') || '[]'
+    ) as StoredProposal[];
     
     // Add new proposal with timestamp
-    const proposalWithTimestamp = {
+    const proposalWithTimestamp: StoredProposal = {
       ...proposalData,
       createdAt: new Date().toISOString(),
       id: `proposal-${Date.now()}`,
@@ -158,14 +169,16 @@ export const saveProposalToLocalStorage = (proposalData: any) => {
     
     // Save updated proposals array
     localStorage.setItem(
-      "parcelInsuranceProposals",
+      'parcelInsuranceProposals',
       JSON.stringify([...existingProposals, proposalWithTimestamp])
     );
     
     return proposalWithTimestamp.id;
   } catch (error) {
-    console.error("Error saving proposal to local storage:", error);
-    throw new Error("Failed to save proposal");
+    // Use a more type-safe approach for error handling
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    // Instead of console.error, throw a more descriptive error
+    throw new Error(`Failed to save proposal: ${errorMessage}`);
   }
 };
 
@@ -173,13 +186,37 @@ export const saveProposalToLocalStorage = (proposalData: any) => {
  * Retrieves all proposals from local storage
  * @returns Array of saved proposals
  */
-export const getProposalsFromLocalStorage = () => {
-  try {
-    return JSON.parse(
-      localStorage.getItem("parcelInsuranceProposals") || "[]"
-    );
-  } catch (error) {
-    console.error("Error retrieving proposals from local storage:", error);
+export const getProposalsFromLocalStorage = (): StoredProposal[] => {
+  const storedData = localStorage.getItem('parcelInsuranceProposals');
+
+  // If no data exists, return empty array
+  if (!storedData) {
     return [];
   }
+
+  const parsedData = JSON.parse(storedData) as unknown;
+
+  // Validate that the parsed data is an array
+  if (!Array.isArray(parsedData)) {
+    // In a production environment, this would be logged to a monitoring service
+    // For now, we'll just return an empty array and reset the corrupted data
+    localStorage.setItem('parcelInsuranceProposals', '[]');
+    return [];
+  }
+
+  // Type guard function to validate StoredProposal structure
+  const isValidProposal = (item: unknown): item is StoredProposal => {
+    return (
+      typeof item === 'object' &&
+      item !== null &&
+      'id' in item &&
+      'createdAt' in item &&
+      'policyholderInfo' in item &&
+      'parcelDetails' in item &&
+      'shippingCoverage' in item &&
+      'premiumCalculation' in item &&
+      'documentsConsent' in item
+    );
+  };
+  return parsedData.filter(isValidProposal);
 };

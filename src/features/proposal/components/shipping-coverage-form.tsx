@@ -1,21 +1,21 @@
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useFormContext } from "react-hook-form";
-import { ShippingCoverage, CoverageType, RiderOption } from "../types";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { CalendarIcon } from "@radix-ui/react-icons";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useFormContext } from 'react-hook-form';
+import { ShippingCoverage, CoverageType, RiderOption } from '../types';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { CalendarIcon } from '@radix-ui/react-icons';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 
 export function ShippingCoverageForm() {
   const {
@@ -24,32 +24,32 @@ export function ShippingCoverageForm() {
   } = useFormContext<{ shippingCoverage: ShippingCoverage }>();
 
   const coverageTypes: CoverageType[] = [
-    "Basic",
-    "Standard",
-    "Premium",
-    "Custom",
+    'Basic',
+    'Standard',
+    'Premium',
+    'Custom',
   ];
 
   const riderOptions: RiderOption[] = [
-    "Water Damage",
-    "Theft Protection",
-    "Extended Coverage",
-    "Express Claims",
+    'Water Damage',
+    'Theft Protection',
+    'Extended Coverage',
+    'Express Claims',
   ];
 
-  const shippingDate = watch("shippingCoverage.shippingDate");
+  const shippingDate = watch('shippingCoverage.shippingDate');
 
   return (
-    <div className="space-y-4 text-start">
+    <div className='space-y-4 text-start'>
       <FormField
         control={control}
-        name="shippingCoverage.origin"
+        name='shippingCoverage.origin'
         render={({ field }) => (
           <FormItem>
             <FormLabel>Origin</FormLabel>
             <FormControl>
               <Input
-                placeholder="Enter origin location"
+                placeholder='Enter origin location'
                 {...field}
               />
             </FormControl>
@@ -60,13 +60,13 @@ export function ShippingCoverageForm() {
 
       <FormField
         control={control}
-        name="shippingCoverage.destination"
+        name='shippingCoverage.destination'
         render={({ field }) => (
           <FormItem>
             <FormLabel>Destination</FormLabel>
             <FormControl>
               <Input
-                placeholder="Enter destination location"
+                placeholder='Enter destination location'
                 {...field}
               />
             </FormControl>
@@ -77,32 +77,32 @@ export function ShippingCoverageForm() {
 
       <FormField
         control={control}
-        name="shippingCoverage.shippingDate"
+        name='shippingCoverage.shippingDate'
         render={({ field }) => (
-          <FormItem className="flex flex-col">
+          <FormItem className='flex flex-col'>
             <FormLabel>Shipping Date</FormLabel>
             <Popover>
               <PopoverTrigger asChild>
                 <FormControl>
                   <Button
-                    variant={"outline"}
+                    variant={'outline'}
                     className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !field.value && "text-muted-foreground"
+                      'w-full justify-start text-left font-normal',
+                      !field.value && 'text-muted-foreground'
                     )}
                   >
                     {field.value ? (
-                      format(field.value, "PPP")
+                      format(field.value, 'PPP')
                     ) : (
                       <span>Select shipping date</span>
                     )}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
                   </Button>
                 </FormControl>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent className='w-auto p-0' align='start'>
                 <Calendar
-                  mode="single"
+                  mode='single'
                   selected={field.value}
                   onSelect={field.onChange}
                   disabled={(date) => date < new Date()}
@@ -116,32 +116,32 @@ export function ShippingCoverageForm() {
 
       <FormField
         control={control}
-        name="shippingCoverage.deliveryDate"
+        name='shippingCoverage.deliveryDate'
         render={({ field }) => (
-          <FormItem className="flex flex-col">
+          <FormItem className='flex flex-col'>
             <FormLabel>Delivery Date</FormLabel>
             <Popover>
               <PopoverTrigger asChild>
                 <FormControl>
                   <Button
-                    variant={"outline"}
+                    variant={'outline'}
                     className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !field.value && "text-muted-foreground"
+                      'w-full justify-start text-left font-normal',
+                      !field.value && 'text-muted-foreground'
                     )}
                   >
                     {field.value ? (
-                      format(field.value, "PPP")
+                      format(field.value, 'PPP')
                     ) : (
                       <span>Select delivery date</span>
                     )}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
                   </Button>
                 </FormControl>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent className='w-auto p-0' align='start'>
                 <Calendar
-                  mode="single"
+                  mode='single'
                   selected={field.value}
                   onSelect={field.onChange}
                   disabled={(date) =>
@@ -158,7 +158,7 @@ export function ShippingCoverageForm() {
 
       <FormField
         control={control}
-        name="shippingCoverage.coverageType"
+        name='shippingCoverage.coverageType'
         render={({ field }) => (
           <FormItem>
             <FormLabel>Coverage Type</FormLabel>
@@ -168,7 +168,7 @@ export function ShippingCoverageForm() {
             >
               <FormControl>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select coverage type" />
+                  <SelectValue placeholder='Select coverage type' />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
@@ -186,16 +186,16 @@ export function ShippingCoverageForm() {
 
       <FormField
         control={control}
-        name="shippingCoverage.deductible"
+        name='shippingCoverage.deductible'
         render={({ field }) => (
           <FormItem>
             <FormLabel>Deductible (Optional)</FormLabel>
             <FormControl>
               <Input
-                placeholder="Enter deductible amount"
-                type="number"
-                min="0"
-                step="0.01"
+                placeholder='Enter deductible amount'
+                type='number'
+                min='0'
+                step='0.01'
                 {...field}
               />
             </FormControl>
@@ -206,13 +206,13 @@ export function ShippingCoverageForm() {
 
       <FormField
         control={control}
-        name="shippingCoverage.riders"
+        name='shippingCoverage.riders'
         render={({ field }) => (
           <FormItem>
             <FormLabel>Additional Riders (Optional)</FormLabel>
-            <div className="space-y-2">
+            <div className='space-y-2'>
               {riderOptions.map((rider) => (
-                <div key={rider} className="flex items-center space-x-2">
+                <div key={rider} className='flex items-center space-x-2'>
                   <FormControl>
                     <Checkbox
                       id={`rider-${rider}`}
@@ -227,7 +227,7 @@ export function ShippingCoverageForm() {
                   </FormControl>
                   <label
                     htmlFor={`rider-${rider}`}
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
                   >
                     {rider}
                   </label>
