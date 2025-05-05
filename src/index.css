@@ -3,6 +3,36 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Sonner Toast Customization */
+/* Direct CSS to ensure the close button is in the right corner */
+[data-sonner-toast] [data-close-button] {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  left: auto !important;
+  margin: 0 !important;
+  opacity: 1 !important;
+  margin-top: 5px !important;
+}
+
+/* Override any Sonner default positioning */
+[data-sonner-toaster][dir='ltr'] [data-close-button] {
+  --toast-close-button-start: auto !important;
+  --toast-close-button-end: 8px !important;
+  inset-inline-start: auto !important;
+  inset-inline-end: 8px !important;
+}
+
+/* Ensure toast container is properly positioned */
+[data-sonner-toaster] {
+  position: fixed !important;
+  top: 16px !important;
+  right: 16px !important;
+  bottom: auto !important;
+  left: auto !important;
+  z-index: 9999 !important;
+}
+
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);

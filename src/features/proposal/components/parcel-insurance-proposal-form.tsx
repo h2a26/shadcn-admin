@@ -477,7 +477,12 @@ const FormStepperComponent = () => {
                   const draftId = await saveAsDraft();
                   toast.success(
                     lastSaved ? 'Draft updated successfully' : 'Draft saved successfully', 
-                    { description: `Draft ID: ${draftId}` }
+                    { 
+                      description: `Draft ID: ${draftId}`,
+                      closeButton: true,
+                      duration: 80000,
+                      position: 'top-right'
+                    }
                   );
                 } catch (error) {
                   // Error is already handled in saveAsDraft
