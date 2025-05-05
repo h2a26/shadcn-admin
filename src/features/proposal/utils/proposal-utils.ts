@@ -2,8 +2,10 @@ import { ParcelDetails, ParcelInsuranceProposal, ShippingCoverage } from '../typ
 
 // Define types for local storage operations
 interface StoredProposal extends ParcelInsuranceProposal {
-  createdAt: string;
   id: string;
+  createdAt: string;
+  updatedAt?: string;
+  status: 'draft' | 'submitted' | 'approved' | 'rejected';
 }
 
 /**
@@ -165,6 +167,7 @@ export const saveProposalToLocalStorage = (proposalData: ParcelInsuranceProposal
       ...proposalData,
       createdAt: new Date().toISOString(),
       id: `proposal-${Date.now()}`,
+      status: 'draft' // Default status for new proposals
     };
     
     // Save updated proposals array
@@ -219,4 +222,74 @@ export const getProposalsFromLocalStorage = (): StoredProposal[] => {
     );
   };
   return parsedData.filter(isValidProposal);
+};
+
+/**
+ * Updates an existing proposal in local storage
+ * @param id The ID of the proposal to update
+ * @param updatedData The updated proposal data
+ * @returns Boolean indicating success or failure
+ */
+export const updateProposalInLocalStorage = (
+  id: string,
+  updatedData: Partial<ParcelInsuranceProposal>
+): boolean => {
+  try {
+    // Get existing proposals
+    const proposals = getProposalsFromLocalStorage();
+    
+    // Find the proposal to update
+    const proposalIndex = proposals.findIndex(p => p.id === id);
+    
+    // If proposal not found, return false
+    if (proposalIndex === -1) {
+      return false;
+    }
+    
+    // Create updated proposal with timestamp
+    const updatedProposal: StoredProposal = {
+      ...proposals[proposalIndex],
+      ...updatedData,
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Update proposals array
+    proposals[proposalIndex] = updatedProposal;
+    
+    // Save back to local storage
+    localStorage.setItem('parcelInsuranceProposals', JSON.stringify(proposals));
+    
+    return true;
+  } catch (error) {
+    // In a production environment, this would be logged to a monitoring service
+    return false;
+  }
+};
+
+/**
+ * Deletes a proposal from local storage
+ * @param id The ID of the proposal to delete
+ * @returns Boolean indicating success or failure
+ */
+export const deleteProposalFromLocalStorage = (id: string): boolean => {
+  try {
+    // Get existing proposals
+    const proposals = getProposalsFromLocalStorage();
+    
+    // Filter out the proposal to delete
+    const filteredProposals = proposals.filter(p => p.id !== id);
+    
+    // If no proposal was removed, return false
+    if (filteredProposals.length === proposals.length) {
+      return false;
+    }
+    
+    // Save back to local storage
+    localStorage.setItem('parcelInsuranceProposals', JSON.stringify(filteredProposals));
+    
+    return true;
+  } catch (error) {
+    // In a production environment, this would be logged to a monitoring service
+    return false;
+  }
 };

@@ -19,7 +19,9 @@ import {
   IconUserCog,
   IconUserOff,
   IconUsers,
+  IconFileSymlink,
 } from '@tabler/icons-react'
+
 import { AudioWaveform, Command, GalleryVerticalEnd } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -80,6 +82,11 @@ export const sidebarData: SidebarData = {
           title: 'Proposals',
           url: '/proposal',
           icon: IconFileDescription,
+        },
+        {
+          title: 'Drafts',
+          url: '/drafts',
+          icon: IconFileSymlink,
         },
       ],
     },

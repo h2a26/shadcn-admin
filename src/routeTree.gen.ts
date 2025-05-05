@@ -29,6 +29,7 @@ import { Route as AuthenticatedTasksIndexImport } from './routes/_authenticated/
 import { Route as AuthenticatedSettingsIndexImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedProposalIndexImport } from './routes/_authenticated/proposal/index'
 import { Route as AuthenticatedHelpCenterIndexImport } from './routes/_authenticated/help-center/index'
+import { Route as AuthenticatedDraftsIndexImport } from './routes/_authenticated/drafts/index'
 import { Route as AuthenticatedChatsIndexImport } from './routes/_authenticated/chats/index'
 import { Route as AuthenticatedAppsIndexImport } from './routes/_authenticated/apps/index'
 import { Route as AuthenticatedSettingsNotificationsImport } from './routes/_authenticated/settings/notifications'
@@ -151,6 +152,12 @@ const AuthenticatedHelpCenterIndexRoute =
     path: '/help-center/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+
+const AuthenticatedDraftsIndexRoute = AuthenticatedDraftsIndexImport.update({
+  id: '/drafts/',
+  path: '/drafts/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 const AuthenticatedChatsIndexRoute = AuthenticatedChatsIndexImport.update({
   id: '/chats/',
@@ -329,6 +336,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedChatsIndexImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/drafts/': {
+      id: '/_authenticated/drafts/'
+      path: '/drafts'
+      fullPath: '/drafts'
+      preLoaderRoute: typeof AuthenticatedDraftsIndexImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/help-center/': {
       id: '/_authenticated/help-center/'
       path: '/help-center'
@@ -397,6 +411,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedAppsIndexRoute: typeof AuthenticatedAppsIndexRoute
   AuthenticatedChatsIndexRoute: typeof AuthenticatedChatsIndexRoute
+  AuthenticatedDraftsIndexRoute: typeof AuthenticatedDraftsIndexRoute
   AuthenticatedHelpCenterIndexRoute: typeof AuthenticatedHelpCenterIndexRoute
   AuthenticatedProposalIndexRoute: typeof AuthenticatedProposalIndexRoute
   AuthenticatedTasksIndexRoute: typeof AuthenticatedTasksIndexRoute
@@ -408,6 +423,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedAppsIndexRoute: AuthenticatedAppsIndexRoute,
   AuthenticatedChatsIndexRoute: AuthenticatedChatsIndexRoute,
+  AuthenticatedDraftsIndexRoute: AuthenticatedDraftsIndexRoute,
   AuthenticatedHelpCenterIndexRoute: AuthenticatedHelpCenterIndexRoute,
   AuthenticatedProposalIndexRoute: AuthenticatedProposalIndexRoute,
   AuthenticatedTasksIndexRoute: AuthenticatedTasksIndexRoute,
@@ -437,6 +453,7 @@ export interface FileRoutesByFullPath {
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/apps': typeof AuthenticatedAppsIndexRoute
   '/chats': typeof AuthenticatedChatsIndexRoute
+  '/drafts': typeof AuthenticatedDraftsIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
   '/proposal': typeof AuthenticatedProposalIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -462,6 +479,7 @@ export interface FileRoutesByTo {
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/apps': typeof AuthenticatedAppsIndexRoute
   '/chats': typeof AuthenticatedChatsIndexRoute
+  '/drafts': typeof AuthenticatedDraftsIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
   '/proposal': typeof AuthenticatedProposalIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
@@ -490,6 +508,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexRoute
+  '/_authenticated/drafts/': typeof AuthenticatedDraftsIndexRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexRoute
   '/_authenticated/proposal/': typeof AuthenticatedProposalIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -519,6 +538,7 @@ export interface FileRouteTypes {
     | '/settings/notifications'
     | '/apps'
     | '/chats'
+    | '/drafts'
     | '/help-center'
     | '/proposal'
     | '/settings/'
@@ -543,6 +563,7 @@ export interface FileRouteTypes {
     | '/settings/notifications'
     | '/apps'
     | '/chats'
+    | '/drafts'
     | '/help-center'
     | '/proposal'
     | '/settings'
@@ -569,6 +590,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/notifications'
     | '/_authenticated/apps/'
     | '/_authenticated/chats/'
+    | '/_authenticated/drafts/'
     | '/_authenticated/help-center/'
     | '/_authenticated/proposal/'
     | '/_authenticated/settings/'
@@ -635,6 +657,7 @@ export const routeTree = rootRoute
         "/_authenticated/",
         "/_authenticated/apps/",
         "/_authenticated/chats/",
+        "/_authenticated/drafts/",
         "/_authenticated/help-center/",
         "/_authenticated/proposal/",
         "/_authenticated/tasks/",
@@ -708,6 +731,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/chats/": {
       "filePath": "_authenticated/chats/index.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/drafts/": {
+      "filePath": "_authenticated/drafts/index.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/help-center/": {

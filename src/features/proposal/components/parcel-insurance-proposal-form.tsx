@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { defineStepper } from '@/components/ui/stepper';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useForm, Resolver } from 'react-hook-form';
 import { z } from 'zod';
 import { PolicyholderInfoForm } from './policy-holder-info-form.tsx';
@@ -13,6 +13,12 @@ import { DocumentsConsentForm } from './documents-consent-form.tsx';
 import { stepperSchemas } from '../schemas/form-schemas.ts';
 import { generateProposalNumber, saveProposalToLocalStorage } from '@/features/proposal';
 import { ParcelInsuranceProposal } from '../types';
+import { useRouter } from '@tanstack/react-router';
+import { toast } from 'sonner';
+import { SaveIcon } from 'lucide-react';
+import { useDrafts } from '@/features/drafts';
+import { DraftStatus, DraftType } from '@/features/drafts/types';
+import { saveDraftToStorage, updateDraftInStorage } from '@/features/drafts/utils/storage-utils';
 
 // Define the stepper with all steps
 const { Stepper, useStepper } = defineStepper(
@@ -75,6 +81,15 @@ export function ParcelInsuranceProposalForm() {
 
 const FormStepperComponent = () => {
   const methods = useStepper();
+  const router = useRouter();
+  const { refreshDrafts } = useDrafts();
+  
+  // State for tracking draft ID and auto-save
+  const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [autoSaveEnabled] = useState(true);
+  const autoSaveIntervalRef = useRef<number | null>(null);
+  const formDataRef = useRef<Partial<ParcelInsuranceProposal> | null>(null);
 
   // Use the ParcelInsuranceProposal interface from types/index.ts
   type FormData = ParcelInsuranceProposal;
@@ -130,6 +145,219 @@ const FormStepperComponent = () => {
     },
   });
 
+  // Get current form data
+  const getCurrentFormData = useCallback((): Partial<ParcelInsuranceProposal> => {
+    return form.getValues();
+  }, [form]);
+
+  // Check if form has meaningful data to save as draft
+  const hasFormData = useCallback((): boolean => {
+    const formData = getCurrentFormData();
+    
+    // Check if policyholder info has any non-empty values
+    const hasPolicyholderInfo = formData.policyholderInfo && Object.values(formData.policyholderInfo).some(
+      value => typeof value === 'string' && value.trim() !== ''
+    );
+    
+    // Check if parcel details has any non-empty values
+    const hasParcelDetails = formData.parcelDetails && Object.entries(formData.parcelDetails).some(
+      ([_, value]) => {
+        if (typeof value === 'string') return value.trim() !== '';
+        if (typeof value === 'number') return value > 0;
+        if (typeof value === 'boolean') return value === true;
+        return false;
+      }
+    );
+    
+    // Return true if any section has data
+    return Boolean(hasPolicyholderInfo || hasParcelDetails);
+  }, [getCurrentFormData]);
+
+  // Save current form state as draft
+  const saveAsDraft = useCallback(async (): Promise<string> => {
+    try {
+      const formData = getCurrentFormData();
+      formDataRef.current = formData;
+      
+      // Don't save if there's no meaningful data (prevents empty drafts)
+      if (!currentDraftId && !hasFormData()) {
+        throw new Error('No data to save as draft');
+      }
+      
+      // Create or update draft
+      let draftId: string;
+      if (currentDraftId) {
+        // Update existing draft
+        const draftData = {
+          title: formData.policyholderInfo?.fullName 
+            ? `Proposal for ${formData.policyholderInfo.fullName}` 
+            : 'Untitled Proposal',
+          content: formData,
+          metadata: {
+            currentStep: methods.current.id,
+            lastEditedAt: new Date().toISOString(),
+            proposalNo: formData.premiumCalculation?.proposalNo || '',
+          },
+          updatedAt: new Date().toISOString(),
+        };
+        
+        const success = updateDraftInStorage(currentDraftId, draftData);
+        if (!success) {
+          throw new Error('Failed to update draft');
+        }
+        draftId = currentDraftId;
+      } else {
+        // Create new draft
+        const draftData = {
+          title: formData.policyholderInfo?.fullName 
+            ? `Proposal for ${formData.policyholderInfo.fullName}` 
+            : 'Untitled Proposal',
+          type: 'proposal' as DraftType,
+          status: 'draft' as DraftStatus,
+          content: formData,
+          metadata: {
+            currentStep: methods.current.id,
+            lastEditedAt: new Date().toISOString(),
+            proposalNo: formData.premiumCalculation?.proposalNo || '',
+          },
+          tags: ['proposal', methods.current.id],
+        };
+        
+        draftId = saveDraftToStorage(draftData);
+        setCurrentDraftId(draftId);
+      }
+      
+      setLastSaved(new Date());
+      refreshDrafts();
+      return draftId;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Failed to save draft: ${errorMessage}`);
+      throw error;
+    }
+  }, [currentDraftId, getCurrentFormData, methods.current.id, refreshDrafts]);
+
+  // Auto-save functionality
+  useEffect(() => {
+    if (autoSaveEnabled) {
+      // Set up auto-save interval (every 2 minutes)
+      autoSaveIntervalRef.current = window.setInterval(async () => {
+        try {
+          // Only auto-save if there's meaningful data or we're updating an existing draft
+          if (currentDraftId || hasFormData()) {
+            await saveAsDraft();
+            // Silent auto-save, no toast notification to avoid disrupting the user
+          }
+        } catch (error) {
+          // Silent error handling for auto-save
+          // Don't log the "No data to save as draft" error as it's expected
+          if (error instanceof Error && error.message !== 'No data to save as draft') {
+            console.error('Auto-save failed:', error);
+          }
+        }
+      }, 2 * 60 * 1000); // 2 minutes
+    }
+
+    return () => {
+      if (autoSaveIntervalRef.current) {
+        clearInterval(autoSaveIntervalRef.current);
+      }
+    };
+  }, [autoSaveEnabled, saveAsDraft, currentDraftId, hasFormData]);
+
+  // Save on navigation
+  useEffect(() => {
+    const unsubscribe = router.history.subscribe(() => {
+      // Only save draft when navigating away if there's meaningful data or updating existing draft
+      if (formDataRef.current && (currentDraftId || hasFormData())) {
+        saveAsDraft().catch((error) => {
+          // Don't log the "No data to save as draft" error as it's expected
+          if (error instanceof Error && error.message !== 'No data to save as draft') {
+            console.error('Failed to save draft on navigation:', error);
+          }
+        });
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [router.history, saveAsDraft, currentDraftId, hasFormData]);
+
+  // Handle beforeunload event to save draft when closing the browser
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // Only attempt to save if there's an existing draft ID
+      // This prevents creating new empty drafts on page load/unload cycles
+      if (formDataRef.current && currentDraftId) {
+        // Synchronous save attempt for beforeunload
+        try {
+          const formData = formDataRef.current;
+          const draftData = {
+            content: formData,
+            metadata: {
+              currentStep: methods.current.id,
+              lastEditedAt: new Date().toISOString(),
+            },
+            updatedAt: new Date().toISOString(),
+          };
+          updateDraftInStorage(currentDraftId, draftData);
+        } catch (error) {
+          // Cannot show error in beforeunload event
+          console.error('Failed to save draft on beforeunload:', error);
+        }
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [currentDraftId, methods.current.id]);
+
+  // Check for a draft to resume on component mount
+  useEffect(() => {
+    const resumeDraftId = sessionStorage.getItem('resume_draft_id');
+    if (resumeDraftId) {
+      // Clear the session storage to avoid loading the draft again on refresh
+      sessionStorage.removeItem('resume_draft_id');
+      
+      try {
+        // Import the getDraftById function from the drafts feature
+        const { getDraftById } = require('@/features/drafts/utils/storage-utils');
+        const draft = getDraftById(resumeDraftId);
+        
+        if (draft && draft.type === 'proposal') {
+          // Set the current draft ID
+          setCurrentDraftId(resumeDraftId);
+          
+          // Get the saved form data from the draft
+          const formData = draft.content as ParcelInsuranceProposal;
+          
+          // Reset the form with the draft data
+          form.reset(formData);
+          
+          // Navigate to the last active step
+          const lastStep = draft.metadata.currentStep as string;
+          // Check if the step ID is valid
+          if (lastStep && methods.all.some(step => step.id === lastStep)) {
+            // Type assertion to ensure type safety
+            const validStepId = lastStep as "policyholderInfo" | "parcelDetails" | "shippingCoverage" | "premiumCalculation" | "documentsConsent";
+            methods.goTo(validStepId);
+          }
+          
+          // Show a toast notification
+          toast.success('Draft loaded successfully', {
+            description: `Resuming from where you left off.`
+          });
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        toast.error(`Failed to load draft: ${errorMessage}`);
+      }
+    }
+  }, [form, methods]);
+
   // Generate proposal number when reaching the premium calculation step
   useEffect(() => {
     if (methods.current.id === 'premiumCalculation') {
@@ -139,6 +367,9 @@ const FormStepperComponent = () => {
         form.setValue('premiumCalculation.proposalNo', proposalNo);
       }
     }
+    
+    // Update formDataRef whenever the step changes
+    formDataRef.current = form.getValues();
   }, [methods.current.id, form, methods]);
 
   // Define a properly typed submit handler
@@ -229,14 +460,34 @@ const FormStepperComponent = () => {
         </div>
 
         <Stepper.Controls className='flex justify-between mt-6'>
-          <Button
-            type='button'
-            variant='outline'
-            onClick={methods.prev}
-            disabled={methods.isFirst}
-          >
-            Previous
-          </Button>
+          <div className='flex gap-2'>
+            <Button
+              type='button'
+              variant='outline'
+              onClick={methods.prev}
+              disabled={methods.isFirst}
+            >
+              Previous
+            </Button>
+            <Button
+              type='button'
+              variant='outline'
+              onClick={async () => {
+                try {
+                  const draftId = await saveAsDraft();
+                  toast.success(
+                    lastSaved ? 'Draft updated successfully' : 'Draft saved successfully', 
+                    { description: `Draft ID: ${draftId}` }
+                  );
+                } catch (error) {
+                  // Error is already handled in saveAsDraft
+                }
+              }}
+            >
+              <SaveIcon className="mr-2 h-4 w-4" />
+              Save as Draft
+            </Button>
+          </div>
           <Button 
             type='button'
             onClick={async () => {

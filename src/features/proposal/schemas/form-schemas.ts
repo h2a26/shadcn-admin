@@ -83,8 +83,8 @@ export const documentsConsentSchema = z.object({
   identityDoc: z.any().optional().nullable(),
   ownershipProof: z.any().optional().nullable(),
   invoice: z.any().optional().nullable(),
-  agreeTerms: z.boolean().refine((val) => val === true, "You must agree to the terms"),
-  confirmAccuracy: z.boolean().refine((val) => val === true, "You must confirm accuracy"),
+  agreeTerms: z.boolean().refine((val) => val, "You must agree to the terms"),
+  confirmAccuracy: z.boolean().refine((val) => val, "You must confirm accuracy"),
 });
 
 // For form validation in stepper
