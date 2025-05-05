@@ -52,6 +52,6 @@ export interface ParcelInsuranceProposal {
   documentsConsent: DocumentsConsent;
 }
 
-export type CoverageType = "Basic" | "Standard" | "Premium" | "Custom";
-export type ParcelCategory = "Electronics" | "Documents" | "Clothing" | "Fragile" | "Perishable" | "Other";
-export type RiderOption = "Water Damage" | "Theft Protection" | "Extended Coverage" | "Express Claims";
+export type CoverageType = 'Basic' | 'Standard' | 'Premium' | 'Custom';
+export type ParcelCategory = 'Electronics' | 'Documents' | 'Clothing' | 'Fragile' | 'Perishable' | 'Other';
+export type RiderOption = 'Water Damage' | 'Theft Protection' | 'Extended Coverage' | 'Express Claims';

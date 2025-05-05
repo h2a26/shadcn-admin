@@ -7,8 +7,8 @@ import { ParcelInsuranceProposalForm } from './components/parcel-insurance-propo
 
 
 // Export types and utilities for use in other modules
-export * from "./types"
-export * from "./utils/proposal-utils.ts"
+export * from './types'
+export * from './utils/proposal-utils.ts'
 
 export default function Proposal() {
   return (
