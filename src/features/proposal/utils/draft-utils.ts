@@ -6,13 +6,11 @@ import { saveDraftToStorage, updateDraftInStorage } from '@/features/drafts';
  * Converts a proposal form state to a draft object
  * @param proposal The proposal form data
  * @param currentStep The current step in the form
- * @param existingDraftId Optional existing draft ID to update
  * @returns The draft object
  */
 export function proposalToDraft(
   proposal: Partial<ParcelInsuranceProposal>, 
-  currentStep: string,
-  existingDraftId?: string
+  currentStep: string
 ): Omit<Draft, 'id' | 'createdAt'> {
   // Generate a title based on available data
   let title = 'Untitled Proposal';
@@ -63,7 +61,7 @@ export function saveProposalAsDraft(
   currentStep: string,
   existingDraftId?: string
 ): string {
-  const draftData = proposalToDraft(proposal, currentStep, existingDraftId);
+  const draftData = proposalToDraft(proposal, currentStep);
   
   if (existingDraftId) {
     // Update existing draft

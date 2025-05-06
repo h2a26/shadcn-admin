@@ -96,12 +96,16 @@ export function DraftsTable() {
     
     switch (draft.type) {
       case 'proposal':
+        // Store the draft ID in sessionStorage to be picked up by the proposal form
+        sessionStorage.setItem('resume_draft_id', draft.id);
         navigate({ to: '/proposal' });
         break;
       case 'policy':
+        // Future implementation for policy drafts
         navigate({ to: '/' });
         break;
       case 'claim':
+        // Future implementation for claim drafts
         navigate({ to: '/' });
         break;
       default:

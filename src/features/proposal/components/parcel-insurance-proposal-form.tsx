@@ -17,8 +17,6 @@ import { useRouter } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { SaveIcon } from 'lucide-react';
 import { useDrafts } from '@/features/drafts';
-import { DraftStatus, DraftType } from '@/features/drafts/types';
-import { saveDraftToStorage, updateDraftInStorage } from '@/features/drafts/utils/storage-utils';
 import { getDraftById } from '@/features/drafts/utils/storage-utils';
 
 const { Stepper, useStepper } = defineStepper(
@@ -166,46 +164,18 @@ const FormStepperComponent = () => {
         throw new Error('No data to save as draft');
       }
       
-      // Create or update draft
-      let draftId: string;
-      if (currentDraftId) {
-        // Update existing draft
-        const draftData = {
-          title: formData.policyholderInfo?.fullName 
-            ? `Proposal for ${formData.policyholderInfo.fullName}` 
-            : 'Untitled Proposal',
-          content: formData,
-          metadata: {
-            currentStep: methods.current.id,
-            lastEditedAt: new Date().toISOString(),
-            proposalNo: formData.premiumCalculation?.proposalNo || '',
-          },
-          updatedAt: new Date().toISOString(),
-        };
-        
-        const success = updateDraftInStorage(currentDraftId, draftData);
-        if (!success) {
-          throw new Error('Failed to update draft');
-        }
-        draftId = currentDraftId;
-      } else {
-        // Create new draft
-        const draftData = {
-          title: formData.policyholderInfo?.fullName 
-            ? `Proposal for ${formData.policyholderInfo.fullName}` 
-            : 'Untitled Proposal',
-          type: 'proposal' as DraftType,
-          status: 'draft' as DraftStatus,
-          content: formData,
-          metadata: {
-            currentStep: methods.current.id,
-            lastEditedAt: new Date().toISOString(),
-            proposalNo: formData.premiumCalculation?.proposalNo || '',
-          },
-          tags: ['proposal', methods.current.id],
-        };
-        
-        draftId = saveDraftToStorage(draftData);
+      // Import the saveProposalAsDraft function from draft-utils
+      const { saveProposalAsDraft } = await import('../utils/draft-utils');
+      
+      // Use the utility function to save the draft
+      const draftId = saveProposalAsDraft(
+        formData,
+        methods.current.id,
+        currentDraftId || undefined
+      );
+      
+      // Update state if this is a new draft
+      if (!currentDraftId) {
         setCurrentDraftId(draftId);
       }
       
@@ -265,21 +235,26 @@ const FormStepperComponent = () => {
       // Only attempt to save if there's an existing draft ID
       // This prevents creating new empty drafts on page load/unload cycles
       if (formDataRef.current && currentDraftId) {
-        // Synchronous save attempt for beforeunload
+        // For beforeunload, we need to use a synchronous approach
+        // We can't use async imports or await here
         try {
-          const formData = formDataRef.current;
-          const draftData = {
-            content: formData,
+          // Create a minimal update with just the essential data
+          const updateData = {
+            content: formDataRef.current,
             metadata: {
               currentStep: methods.current.id,
               lastEditedAt: new Date().toISOString(),
             },
             updatedAt: new Date().toISOString(),
           };
-          updateDraftInStorage(currentDraftId, draftData);
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          throw new Error(`Failed to save draft on beforeunload: ${errorMessage}`);
+          
+          // Use the storage utility directly for this synchronous operation
+          // We'll import this at the top level to ensure it's available
+          const { updateDraftInStorage } = require('@/features/drafts');
+          updateDraftInStorage(currentDraftId, updateData);
+        } catch {
+          // Cannot show errors during beforeunload
+          // Silent failure is acceptable here
         }
       }
     };
@@ -290,37 +265,72 @@ const FormStepperComponent = () => {
     };
   }, [currentDraftId, methods, methods.current.id]);
 
+  // Define valid step IDs type for better type safety
+  type ValidStepId = 'policyholderInfo' | 'parcelDetails' | 'shippingCoverage' | 'premiumCalculation' | 'documentsConsent';
+
   // Check for a draft to resume on component mount
   useEffect(() => {
     const resumeDraftId = sessionStorage.getItem('resume_draft_id');
-    if (resumeDraftId) {
-      // Clear the session storage to avoid loading the draft again on refresh
-      sessionStorage.removeItem('resume_draft_id');
-      
+    
+    if (!resumeDraftId) return;
+
+    // Clear the session storage to avoid loading the draft again on refresh
+    sessionStorage.removeItem('resume_draft_id');
+    
+    // Define an async function inside the effect to handle the draft loading
+    const loadDraft = async () => {
       try {
-        // Import the getDraftById function from the drafts feature
         const draft = getDraftById(resumeDraftId);
         
-        if (draft && draft.type === 'proposal') {
-          // Set the current draft ID
-          setCurrentDraftId(resumeDraftId);
-          
-          // Get the saved form data from the draft
-          const formData = draft.content as ParcelInsuranceProposal;
+        if (!draft) {
+          toast.error('Draft not found');
+          return;
+        }
+        
+        if (draft.type !== 'proposal') {
+          toast.error('Invalid draft type');
+          return;
+        }
+        
+        // Set the current draft ID
+        setCurrentDraftId(resumeDraftId);
+        
+        // Import the utility function
+        const draftUtilsModule = await import('../utils/draft-utils');
+        
+        // Convert the draft to proposal data
+        let formData;
+        try {
+          formData = draftUtilsModule.draftToProposal(draft);
           
           // Reset the form with the draft data
           form.reset(formData);
+          formDataRef.current = formData;
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          toast.error(`Failed to process draft: ${errorMessage}`);
+          return;
+        }
+        
+        // Navigate to the last active step with proper type checking
+        const metadata = draft.metadata;
+        if (!metadata || typeof metadata !== 'object') {
+          toast.error('Invalid draft metadata');
+          return;
+        }
+        
+        const lastStep = metadata.currentStep;
+        if (typeof lastStep !== 'string') {
+          // If no valid step is found, stay on the first step
+          return;
+        }
+        
+        // Check if the step ID is valid
+        if (methods.all.some((step) => step.id === lastStep)) {
+          // Navigate to the saved step
+          methods.goTo(lastStep as ValidStepId);
           
-          // Navigate to the last active step
-          const lastStep = draft.metadata.currentStep as string;
-          // Check if the step ID is valid
-          if (lastStep && methods.all.some(step => step.id === lastStep)) {
-            // Type assertion to ensure type safety
-            const validStepId = lastStep as "policyholderInfo" | "parcelDetails" | "shippingCoverage" | "premiumCalculation" | "documentsConsent";
-            methods.goTo(validStepId);
-          }
-          
-          // Show a toast notification
+          // Show a success notification
           toast.success('Draft loaded successfully', {
             description: `Resuming from where you left off.`
           });
@@ -329,8 +339,11 @@ const FormStepperComponent = () => {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         toast.error(`Failed to load draft: ${errorMessage}`);
       }
-    }
-  }, [form, methods]);
+    };
+    
+    // Execute the async function
+    loadDraft();
+  }, [form, methods, setCurrentDraftId]);
 
   // Generate proposal number when reaching the premium calculation step
   useEffect(() => {
