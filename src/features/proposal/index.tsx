@@ -1,16 +1,17 @@
 import { Header } from '@/components/layout/header'
-import { Main } from '@/components/layout/main';
-import { ProfileDropdown } from '@/components/profile-dropdown';
-import { Search } from '@/components/search';
-import { ThemeSwitch } from '@/components/theme-switch';
-import { ParcelInsuranceProposalForm } from './components/parcel-insurance-proposal-form';
-import { ProposalViewDialog } from './components/proposal-view-dialog';
-import ProposalProvider from './context/proposal-context';
-import { DraftsProvider } from '@/features/drafts';
+import { Main } from '@/components/layout/main'
+import { ProfileDropdown } from '@/components/profile-dropdown'
+import { Search } from '@/components/search'
+import { ThemeSwitch } from '@/components/theme-switch'
+import { ParcelInsuranceProposalForm } from '@/features/proposal/components/parcel-insurance-proposal-form'
+import { ProposalViewDialog } from '@/features/proposal/components/proposal-view-dialog'
+import ProposalProvider from '@/features/proposal/context/proposal-context'
+import { DraftsProvider } from '@/features/drafts'
 
 // Export types and utilities for use in other modules
 export * from './types'
 export * from './utils/proposal-utils'
+export { default as ProposalProvider } from './context/proposal-context'
 
 export default function Proposal() {
   return (
@@ -24,6 +25,8 @@ export default function Proposal() {
           </div>
         </Header>
 
+
+
         <Main>
           <div className='mb-2 flex flex-wrap items-center justify-between space-y-2 gap-x-4'>
             <div>
@@ -36,10 +39,10 @@ export default function Proposal() {
           <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12'>
             <ParcelInsuranceProposalForm />
           </div>
-          
-          {/* Dialogs */}
+
           <ProposalViewDialog />
         </Main>
+
       </ProposalProvider>
     </DraftsProvider>
   )

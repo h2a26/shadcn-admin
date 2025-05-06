@@ -64,17 +64,9 @@ const proposalFormSchema = z.object({
 
 export function ParcelInsuranceProposalForm() {
   return (
-    <div className='container mx-auto py-6'>
-      <div className='mb-6'>
-        <h1 className='text-2xl font-bold'>Parcel Insurance Underwriting</h1>
-        <p className='text-muted-foreground'>
-          Complete the form below to create a new parcel insurance proposal
-        </p>
-      </div>
-      <Stepper.Provider>
-        <FormStepperComponent />
-      </Stepper.Provider>
-    </div>
+    <Stepper.Provider>
+      <FormStepperComponent />
+    </Stepper.Provider>
   );
 }
 
@@ -400,7 +392,7 @@ const FormStepperComponent = () => {
 
   return (
     <Form {...form}>
-      <form onSubmit={onSubmit} className='space-y-8'>
+      <form onSubmit={onSubmit} className='space-y-6'>
         <Stepper.Navigation className='mb-8'>
           {methods.all.map((step) => (
             <Stepper.Step
@@ -424,7 +416,7 @@ const FormStepperComponent = () => {
           ))}
         </Stepper.Navigation>
 
-        <div className='bg-card p-6 rounded-lg border shadow-sm'>
+        <div className='bg-card p-6 rounded-lg border shadow-sm w-full'>
           <div className='mb-6'>
             <h2 className='text-xl font-semibold'>{methods.current.title}</h2>
             <p className='text-sm text-muted-foreground'>
