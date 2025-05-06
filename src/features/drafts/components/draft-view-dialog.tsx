@@ -5,13 +5,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useDrafts } from "../context/drafts-context";
+import { useDrafts } from "@/features/drafts/context/drafts-context";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Pencil, Download, Tag, Clock, CalendarIcon, User } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
-import { DraftType } from "../types";
+import { DraftType } from "@/features/drafts/types";
 
 export function DraftViewDialog() {
   const { open, setOpen, currentDraft } = useDrafts();
@@ -19,29 +19,22 @@ export function DraftViewDialog() {
 
   if (!currentDraft) return null;
 
-  // Format date
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), 'MMM d, yyyy h:mm a');
   };
 
-  // Handle resume
   const handleResume = () => {
     setOpen(null);
     
-    // Navigate based on draft type
     switch (currentDraft.type) {
       case 'proposal':
-        // Store the draft ID in sessionStorage to be picked up by the proposal form
         sessionStorage.setItem('resume_draft_id', currentDraft.id);
-        // Navigate to the proposal form
         navigate({ to: '/proposal' });
         break;
       case 'policy':
-        // Navigate to the home page until policy route exists
         navigate({ to: '/' });
         break;
       case 'claim':
-        // Navigate to the home page until claims route exists
         navigate({ to: '/' });
         break;
       default:
@@ -49,7 +42,6 @@ export function DraftViewDialog() {
     }
   };
 
-  // Get type label
   const getTypeLabel = (type: DraftType): string => {
     switch (type) {
       case 'proposal': return 'Insurance Proposal';

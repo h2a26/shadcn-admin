@@ -5,22 +5,22 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useForm, Resolver } from 'react-hook-form';
 import { z } from 'zod';
-import { PolicyholderInfoForm } from './policy-holder-info-form.tsx';
-import { ParcelDetailsForm } from './parcel-details-form.tsx';
-import { ShippingCoverageForm } from './shipping-coverage-form.tsx';
-import { PremiumCalculationForm } from './premium-calculation-form.tsx';
-import { DocumentsConsentForm } from './documents-consent-form.tsx';
-import { stepperSchemas } from '../schemas/form-schemas.ts';
+import { PolicyholderInfoForm } from '@/features/proposal/components/policy-holder-info-form';
+import { ParcelDetailsForm } from '@/features/proposal/components/parcel-details-form';
+import { ShippingCoverageForm } from '@/features/proposal/components/shipping-coverage-form';
+import { PremiumCalculationForm } from '@/features/proposal/components/premium-calculation-form';
+import { DocumentsConsentForm } from '@/features/proposal/components/documents-consent-form';
+import { stepperSchemas } from '@/features/proposal/schemas/form-schemas';
 import { generateProposalNumber, saveProposalToLocalStorage } from '@/features/proposal';
-import { ParcelInsuranceProposal } from '../types';
+import { ParcelInsuranceProposal } from '@/features/proposal/types';
 import { useRouter } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { SaveIcon } from 'lucide-react';
 import { useDrafts } from '@/features/drafts';
 import { DraftStatus, DraftType } from '@/features/drafts/types';
 import { saveDraftToStorage, updateDraftInStorage } from '@/features/drafts/utils/storage-utils';
+import { getDraftById } from '@/features/drafts/utils/storage-utils';
 
-// Define the stepper with all steps
 const { Stepper, useStepper } = defineStepper(
   {
     id: 'policyholderInfo',
@@ -54,7 +54,6 @@ const { Stepper, useStepper } = defineStepper(
   }
 );
 
-// Create a merged schema for the entire form using the stepper schemas
 const proposalFormSchema = z.object({
   policyholderInfo: stepperSchemas.policyholderInfo,
   parcelDetails: stepperSchemas.parcelDetails,
@@ -84,20 +83,16 @@ const FormStepperComponent = () => {
   const router = useRouter();
   const { refreshDrafts } = useDrafts();
   
-  // State for tracking draft ID and auto-save
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [autoSaveEnabled] = useState(true);
   const autoSaveIntervalRef = useRef<number | null>(null);
   const formDataRef = useRef<Partial<ParcelInsuranceProposal> | null>(null);
 
-  // Use the ParcelInsuranceProposal interface from types/index.ts
   type FormData = ParcelInsuranceProposal;
   
   const form = useForm<FormData>({
     mode: 'onTouched',
-    // Cast the resolver to the correct type to resolve TypeScript errors
-    // This is safe because we're using the correct schema for our form data
     resolver: zodResolver(proposalFormSchema) as unknown as Resolver<FormData>,
     shouldUnregister: false,
     defaultValues: {
@@ -145,16 +140,13 @@ const FormStepperComponent = () => {
     },
   });
 
-  // Get current form data
   const getCurrentFormData = useCallback((): Partial<ParcelInsuranceProposal> => {
     return form.getValues();
   }, [form]);
 
-  // Check if form has meaningful data to save as draft
   const hasFormData = useCallback((): boolean => {
     const formData = getCurrentFormData();
     
-    // Check if policyholder info has any non-empty values
     const hasPolicyholderInfo = formData.policyholderInfo && Object.values(formData.policyholderInfo).some(
       value => typeof value === 'string' && value.trim() !== ''
     );
@@ -164,16 +156,14 @@ const FormStepperComponent = () => {
       ([_, value]) => {
         if (typeof value === 'string') return value.trim() !== '';
         if (typeof value === 'number') return value > 0;
-        if (typeof value === 'boolean') return value === true;
+        if (typeof value === 'boolean') return value;
         return false;
       }
     );
     
-    // Return true if any section has data
     return Boolean(hasPolicyholderInfo || hasParcelDetails);
   }, [getCurrentFormData]);
 
-  // Save current form state as draft
   const saveAsDraft = useCallback(async (): Promise<string> => {
     try {
       const formData = getCurrentFormData();
@@ -235,7 +225,7 @@ const FormStepperComponent = () => {
       toast.error(`Failed to save draft: ${errorMessage}`);
       throw error;
     }
-  }, [currentDraftId, getCurrentFormData, methods.current.id, refreshDrafts]);
+  }, [currentDraftId, getCurrentFormData, hasFormData, methods, refreshDrafts]);
 
   // Auto-save functionality
   useEffect(() => {
@@ -243,17 +233,12 @@ const FormStepperComponent = () => {
       // Set up auto-save interval (every 2 minutes)
       autoSaveIntervalRef.current = window.setInterval(async () => {
         try {
-          // Only auto-save if there's meaningful data or we're updating an existing draft
           if (currentDraftId || hasFormData()) {
             await saveAsDraft();
-            // Silent auto-save, no toast notification to avoid disrupting the user
           }
         } catch (error) {
-          // Silent error handling for auto-save
-          // Don't log the "No data to save as draft" error as it's expected
-          if (error instanceof Error && error.message !== 'No data to save as draft') {
-            console.error('Auto-save failed:', error);
-          }
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          throw new Error(`Auto-save failed: ${errorMessage}`);
         }
       }, 2 * 60 * 1000); // 2 minutes
     }
@@ -271,10 +256,8 @@ const FormStepperComponent = () => {
       // Only save draft when navigating away if there's meaningful data or updating existing draft
       if (formDataRef.current && (currentDraftId || hasFormData())) {
         saveAsDraft().catch((error) => {
-          // Don't log the "No data to save as draft" error as it's expected
-          if (error instanceof Error && error.message !== 'No data to save as draft') {
-            console.error('Failed to save draft on navigation:', error);
-          }
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          throw new Error(`Auto-save failed: ${errorMessage}`);
         });
       }
     });
@@ -303,8 +286,8 @@ const FormStepperComponent = () => {
           };
           updateDraftInStorage(currentDraftId, draftData);
         } catch (error) {
-          // Cannot show error in beforeunload event
-          console.error('Failed to save draft on beforeunload:', error);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          throw new Error(`Failed to save draft on beforeunload: ${errorMessage}`);
         }
       }
     };
@@ -313,7 +296,7 @@ const FormStepperComponent = () => {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [currentDraftId, methods.current.id]);
+  }, [currentDraftId, methods, methods.current.id]);
 
   // Check for a draft to resume on component mount
   useEffect(() => {
@@ -324,7 +307,6 @@ const FormStepperComponent = () => {
       
       try {
         // Import the getDraftById function from the drafts feature
-        const { getDraftById } = require('@/features/drafts/utils/storage-utils');
         const draft = getDraftById(resumeDraftId);
         
         if (draft && draft.type === 'proposal') {
@@ -485,7 +467,8 @@ const FormStepperComponent = () => {
                     }
                   );
                 } catch (error) {
-                  // Error is already handled in saveAsDraft
+                  const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                  toast.error(`Failed to load draft: ${errorMessage}`);
                 }
               }}
             >

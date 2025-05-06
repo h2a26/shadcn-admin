@@ -260,8 +260,7 @@ export const updateProposalInLocalStorage = (
     localStorage.setItem('parcelInsuranceProposals', JSON.stringify(proposals));
     
     return true;
-  } catch (error) {
-    // In a production environment, this would be logged to a monitoring service
+  } catch {
     return false;
   }
 };
@@ -288,8 +287,7 @@ export const deleteProposalFromLocalStorage = (id: string): boolean => {
     localStorage.setItem('parcelInsuranceProposals', JSON.stringify(filteredProposals));
     
     return true;
-  } catch (error) {
-    // In a production environment, this would be logged to a monitoring service
+  } catch {
     return false;
   }
 };

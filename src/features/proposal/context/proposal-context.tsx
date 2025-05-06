@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import useDialogState from '@/hooks/use-dialog-state'
-import { ParcelInsuranceProposal } from '../types'
+import { ParcelInsuranceProposal } from '@/features/proposal/types'
 import {
   getProposalsFromLocalStorage,
   saveProposalToLocalStorage,
   updateProposalInLocalStorage,
   deleteProposalFromLocalStorage
-} from '../utils/proposal-utils'
+} from '@/features/proposal/utils/proposal-utils'
 
 // Define the types of dialogs that can be opened in the proposal feature
 type ProposalDialogType = 'create' | 'view' | 'edit' | 'delete'

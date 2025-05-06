@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-// Policyholder Info Schema
 export const policyholderInfoSchema = z.object({
   fullName: z.string().min(1, "Full name is required"),
   phoneNumber: z
@@ -19,7 +18,6 @@ export const policyholderInfoSchema = z.object({
   address: z.string().optional().or(z.literal("")),
 });
 
-// Parcel Details Schema
 export const parcelDetailsSchema = z.object({
   description: z.string().min(1, "Description is required"),
   category: z.string().min(1, "Category is required"),
@@ -48,7 +46,6 @@ export const parcelDetailsSchema = z.object({
   highRiskItem: z.boolean().default(false),
 });
 
-// Shipping & Coverage Schema
 export const shippingCoverageSchema = z.object({
   origin: z.string().min(1, "Origin is required"),
   destination: z.string().min(1, "Destination is required"),
@@ -68,7 +65,6 @@ export const shippingCoverageSchema = z.object({
   riders: z.array(z.string()).optional(),
 });
 
-// Premium Calculation Schema
 export const premiumCalculationSchema = z.object({
   proposalNo: z.string().min(1, "Proposal number is required"),
   basePremium: z.number(),
@@ -77,9 +73,7 @@ export const premiumCalculationSchema = z.object({
   discountCode: z.string().optional().or(z.literal("")),
 });
 
-// Documents & Consent Schema
 export const documentsConsentSchema = z.object({
-  // Make file validation more flexible to handle both File objects and null/undefined
   identityDoc: z.any().optional().nullable(),
   ownershipProof: z.any().optional().nullable(),
   invoice: z.any().optional().nullable(),
@@ -87,7 +81,6 @@ export const documentsConsentSchema = z.object({
   confirmAccuracy: z.boolean().refine((val) => val, "You must confirm accuracy"),
 });
 
-// For form validation in stepper
 export const stepperSchemas = {
   policyholderInfo: policyholderInfoSchema,
   parcelDetails: parcelDetailsSchema,

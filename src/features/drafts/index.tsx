@@ -5,5 +5,4 @@ export { DraftsView, DraftsProvider, useDrafts };
 export * from './types';
 export * from './utils/storage-utils';
 
-// Default export
 export default DraftsView;

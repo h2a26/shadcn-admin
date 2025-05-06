@@ -1,15 +1,3 @@
-import { Header } from '@/components/layout/header';
-import { Main } from '@/components/layout/main';
-import { ProfileDropdown } from '@/components/profile-dropdown';
-import { Search } from '@/components/search';
-import { ThemeSwitch } from '@/components/theme-switch';
-import { DraftsTable } from './drafts-table';
-import { Button } from '@/components/ui/button';
-import { useNavigate } from '@tanstack/react-router';
-import { Plus, FileText } from 'lucide-react';
-import { DraftsProvider } from '../context/drafts-context';
-import { DraftViewDialog } from './draft-view-dialog.tsx';
-import { useState } from 'react';
 import {
   Select,
   SelectContent,
@@ -17,6 +5,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Header } from '@/components/layout/header';
+import { Main } from '@/components/layout/main';
+import { ProfileDropdown } from '@/components/profile-dropdown';
+import { Search } from '@/components/search';
+import { ThemeSwitch } from '@/components/theme-switch';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from '@tanstack/react-router';
+import { Plus, FileText } from 'lucide-react';
+import { DraftsProvider } from '@/features/drafts/context/drafts-context';
+import { DraftsTable } from '@/features/drafts/components/drafts-table';
+import { DraftViewDialog } from '@/features/drafts/components/draft-view-dialog';
+import { useState } from 'react';
+
 
 export function DraftsView() {
   const navigate = useNavigate();
@@ -25,15 +26,12 @@ export function DraftsView() {
   const handleCreateNew = () => {
     switch (selectedType) {
       case 'proposal':
-        // Navigate to the proposal page
-        navigate({ to: '/' });
+        navigate({ to: '/proposal' });
         break;
       case 'policy':
-        // Navigate to the home page until policy route exists
         navigate({ to: '/' });
         break;
       case 'claim':
-        // Navigate to the home page until claims route exists
         navigate({ to: '/' });
         break;
       default:
@@ -88,7 +86,6 @@ export function DraftsView() {
           <DraftsTable />
         </div>
         
-        {/* Dialogs */}
         <DraftViewDialog />
       </Main>
     </DraftsProvider>

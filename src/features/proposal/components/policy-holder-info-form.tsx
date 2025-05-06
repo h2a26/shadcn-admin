@@ -1,7 +1,7 @@
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useFormContext } from 'react-hook-form';
-import { PolicyholderInfo } from '../types';
+import { PolicyholderInfo } from '@/features/proposal/types';
 
 export function PolicyholderInfoForm() {
   const {

@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Controller, useFormContext } from 'react-hook-form';
-import { DocumentsConsent } from '../types';
+import { DocumentsConsent } from '@/features/proposal/types';
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 

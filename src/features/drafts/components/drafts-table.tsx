@@ -45,24 +45,19 @@ export function DraftsTable() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  // Filter drafts based on current filters
   const filteredDrafts = drafts.filter(draft => {
-    // Filter by status
     if (filters.status && draft.status !== filters.status) {
       return false;
     }
     
-    // Filter by type
     if (filters.type && draft.type !== filters.type) {
       return false;
     }
     
-    // Filter by search query
     if (searchQuery && !draft.title.toLowerCase().includes(searchQuery.toLowerCase())) {
       return false;
     }
     
-    // Filter by tags
     if (filters.tags && filters.tags.length > 0) {
       if (!draft.tags || !filters.tags.some(tag => draft.tags?.includes(tag))) {
         return false;
@@ -72,7 +67,6 @@ export function DraftsTable() {
     return true;
   });
   
-  // Sort drafts based on sort options
   const sortedDrafts = [...filteredDrafts].sort((a, b) => {
     const fieldA = a[sortOptions.field];
     const fieldB = b[sortOptions.field];
@@ -85,7 +79,6 @@ export function DraftsTable() {
     return sortOptions.direction === 'asc' ? comparison : -comparison;
   });
 
-  // Format date
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -98,18 +91,17 @@ export function DraftsTable() {
     }
   };
 
-  // Handle resume draft
   const handleResume = (draft: Draft) => {
     setCurrentDraft(draft);
     
-    // Navigate based on draft type
     switch (draft.type) {
       case 'proposal':
-        // Navigate to the proposal page
-        navigate({ to: '/' });
+        navigate({ to: '/proposal' });
         break;
       case 'policy':
-        // Navigate to the home page until policy route exists
+        navigate({ to: '/' });
+        break;
+      case 'claim':
         navigate({ to: '/' });
         break;
       default:
@@ -117,19 +109,16 @@ export function DraftsTable() {
     }
   };
 
-  // Handle view draft
   const handleView = (draft: Draft) => {
     setCurrentDraft(draft);
     setOpen('view');
   };
 
-  // Handle delete draft
   const handleDelete = (draftId: string) => {
     deleteDraft(draftId);
     refreshDrafts();
   };
 
-  // Status badge color mapping
   const getStatusBadgeVariant = (status: DraftStatus) => {
     switch (status) {
       case 'draft': return 'outline';
@@ -140,7 +129,6 @@ export function DraftsTable() {
     }
   };
 
-  // Type badge color mapping
   const getTypeBadge = (type: DraftType) => {
     switch (type) {
       case 'proposal': return { label: 'Proposal', variant: 'outline' as const };

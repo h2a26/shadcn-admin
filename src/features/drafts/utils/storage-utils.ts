@@ -1,13 +1,7 @@
 import { Draft } from '../types'
 
-// Storage key for drafts
 const STORAGE_KEY = 'shadcn-admin-drafts'
 
-/**
- * Type guard function to validate Draft structure
- * @param item Item to validate
- * @returns Boolean indicating if the item is a valid Draft
- */
 const isValidDraft = (item: unknown): item is Draft => {
   return (
     typeof item === 'object' &&
@@ -21,11 +15,6 @@ const isValidDraft = (item: unknown): item is Draft => {
   )
 }
 
-/**
- * Safely parse JSON data with type validation
- * @param data JSON string to parse
- * @returns Parsed data or null if invalid
- */
 const safelyParseJSON = (data: string): unknown => {
   try {
     return JSON.parse(data)
@@ -34,56 +23,37 @@ const safelyParseJSON = (data: string): unknown => {
   }
 }
 
-/**
- * Reset storage to empty array
- */
 const resetStorage = (): void => {
   localStorage.setItem(STORAGE_KEY, '[]')
 }
 
-/**
- * Retrieves all drafts from local storage
- * @returns Array of saved drafts
- */
 export function getDraftsFromStorage(): Draft[] {
   const storedData = localStorage.getItem(STORAGE_KEY)
 
-  // If no data exists, return empty array
   if (!storedData) {
     return []
   }
 
   const parsedData = safelyParseJSON(storedData)
   
-  // Validate that the parsed data is an array
   if (!parsedData || !Array.isArray(parsedData)) {
     resetStorage()
     return []
   }
 
-  // Filter out invalid drafts
   return parsedData.filter(isValidDraft)
 }
 
-/**
- * Saves a draft to local storage
- * @param draft Draft data to save (without id and createdAt)
- * @returns The ID of the saved draft
- * @throws Error if saving fails
- */
 export function saveDraftToStorage(draft: Omit<Draft, 'id' | 'createdAt'>): string {
   try {
-    // Get existing drafts
     const existingDrafts = getDraftsFromStorage()
     
-    // Create new draft with ID and timestamp
     const newDraft: Draft = {
       ...draft,
       id: `draft-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       createdAt: new Date().toISOString(),
     }
     
-    // Save updated drafts array
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify([...existingDrafts, newDraft])
@@ -96,14 +66,8 @@ export function saveDraftToStorage(draft: Omit<Draft, 'id' | 'createdAt'>): stri
   }
 }
 
-/**
- * Updates an existing draft in local storage
- * @param id ID of the draft to update
- * @param updatedData Updated draft data
- * @returns Boolean indicating success
- */
 export function updateDraftInStorage(id: string, updatedData: Partial<Draft>): boolean {
-  if (!id || typeof id !== 'string') {
+  if (!id) {
     return false
   }
   
@@ -115,18 +79,15 @@ export function updateDraftInStorage(id: string, updatedData: Partial<Draft>): b
       return false
     }
     
-    // Create updated draft
     const updatedDraft: Draft = {
       ...drafts[draftIndex],
       ...updatedData,
       updatedAt: new Date().toISOString()
     }
     
-    // Update drafts array
     const updatedDrafts = [...drafts]
     updatedDrafts[draftIndex] = updatedDraft
     
-    // Save to local storage
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedDrafts))
     
     return true
@@ -135,13 +96,8 @@ export function updateDraftInStorage(id: string, updatedData: Partial<Draft>): b
   }
 }
 
-/**
- * Deletes a draft from local storage
- * @param id ID of the draft to delete
- * @returns Boolean indicating success
- */
 export function deleteDraftFromStorage(id: string): boolean {
-  if (!id || typeof id !== 'string') {
+  if (!id) {
     return false
   }
   
@@ -150,11 +106,9 @@ export function deleteDraftFromStorage(id: string): boolean {
     const filteredDrafts = drafts.filter(d => d.id !== id)
     
     if (filteredDrafts.length === drafts.length) {
-      // No draft was removed
       return false
     }
-    
-    // Save to local storage
+
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filteredDrafts))
     
     return true
@@ -163,13 +117,8 @@ export function deleteDraftFromStorage(id: string): boolean {
   }
 }
 
-/**
- * Gets a single draft by ID
- * @param id ID of the draft to retrieve
- * @returns The draft or null if not found
- */
 export function getDraftById(id: string): Draft | null {
-  if (!id || typeof id !== 'string') {
+  if (!id) {
     return null
   }
   
