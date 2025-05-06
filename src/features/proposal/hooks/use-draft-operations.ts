@@ -8,6 +8,7 @@ import {
   ProposalStepId,
 } from '@/features/proposal/types'
 import { saveProposalAsDraft, draftToProposal } from '@/features/proposal/utils/draft-utils'
+import { isValidStepId } from '@/features/proposal/utils/stepper-utils'
 
 export interface UseDraftOperationsReturn {
   currentDraftId: string | null
@@ -50,8 +51,7 @@ export function useDraftOperations(
         refreshDrafts()
         return draftId
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error'
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
         toast.error(`Failed to save draft: ${errorMessage}`, {
           closeButton: true,
           duration: 30000,
@@ -62,16 +62,6 @@ export function useDraftOperations(
     },
     [currentDraftId, getCurrentFormData, hasFormData, refreshDrafts]
   )
-
-  function isValidStepId(id: string): id is ProposalStepId {
-    return [
-      'policyholderInfo',
-      'parcelDetails',
-      'shippingCoverage',
-      'premiumCalculation',
-      'documentsConsent',
-    ].includes(id as ProposalStepId)
-  }
 
   const loadDraft = useCallback(
     async (draftId: string): Promise<void> => {

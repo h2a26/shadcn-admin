@@ -2,8 +2,8 @@ import { useForm, UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import React, { useCallback, useRef } from 'react';
-import { ParcelInsuranceProposal, ProposalStepId } from '../types';
-import { stepperSchemas } from '../schemas/form-schemas';
+import { ParcelInsuranceProposal, ProposalStepId } from '@/features/proposal/types';
+import { stepperSchemas } from '@/features/proposal/schemas/form-schemas';
 
 export type ProposalFormData = ParcelInsuranceProposal;
 

@@ -9,7 +9,7 @@ import { useDrafts } from "@/features/drafts/context/drafts-context";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Pencil, Download, Tag, Clock, CalendarIcon, User } from "lucide-react";
+import { Pencil, Tag, Clock, CalendarIcon, User } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { DraftType } from "@/features/drafts/types";
 
@@ -34,14 +34,6 @@ export function DraftViewDialog() {
         sessionStorage.setItem('resume_draft_id', currentDraft.id);
         navigate({ to: '/proposal' });
         break;
-      case 'policy':
-        // Future implementation for policy drafts
-        navigate({ to: '/' });
-        break;
-      case 'claim':
-        // Future implementation for claim drafts
-        navigate({ to: '/' });
-        break;
       default:
         navigate({ to: '/' });
     }
@@ -50,17 +42,15 @@ export function DraftViewDialog() {
   const getTypeLabel = (type: DraftType): string => {
     switch (type) {
       case 'proposal': return 'Insurance Proposal';
-      case 'policy': return 'Insurance Policy';
-      case 'claim': return 'Insurance Claim';
       default: return type.charAt(0).toUpperCase() + type.slice(1);
     }
   };
 
   return (
     <Dialog open={open === 'view'} onOpenChange={(open) => !open && setOpen(null)}>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl w-5xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
+          <DialogTitle className="flex items-center gap-4">
             <span>{currentDraft.title}</span>
             <Badge variant="outline">
               {currentDraft.status.charAt(0).toUpperCase() + currentDraft.status.slice(1)}
@@ -151,10 +141,6 @@ export function DraftViewDialog() {
         <div className="flex justify-end gap-2 mt-4">
           <Button variant="outline" onClick={() => setOpen(null)}>
             Close
-          </Button>
-          <Button variant="outline">
-            <Download className="mr-2 h-4 w-4" />
-            Export
           </Button>
           {currentDraft.status === 'draft' && (
             <Button onClick={handleResume}>

@@ -11,9 +11,6 @@ interface StepperControlsProps {
   onSaveDraft: () => Promise<string>;
 }
 
-/**
- * Component for rendering the stepper controls (previous, save, continue buttons)
- */
 export function ProposalStepperControls({ 
   isFirstStep, 
   isLastStep, 

@@ -9,9 +9,6 @@ interface StepperContentProps {
   getStepDescription: (stepId: string) => string;
 }
 
-/**
- * Component for rendering the current step content
- */
 export function ProposalStepperContent({ 
   currentStep,
   getStepDescription

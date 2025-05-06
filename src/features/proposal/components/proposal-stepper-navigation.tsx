@@ -16,9 +16,6 @@ interface StepperNavigationProps {
   StepperTitle: React.ComponentType<React.PropsWithChildren<object>>;
 }
 
-/**
- * Component for rendering the stepper navigation
- */
 export function ProposalStepperNavigation({
                                             steps,
                                             currentStepId,

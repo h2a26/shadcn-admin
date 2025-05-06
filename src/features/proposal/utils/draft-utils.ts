@@ -1,5 +1,5 @@
 import { Draft, DraftType } from '@/features/drafts';
-import { ParcelInsuranceProposal } from '../types';
+import { ParcelInsuranceProposal } from '@/features/proposal/types';
 import { saveDraftToStorage, updateDraftInStorage } from '@/features/drafts';
 
 export function proposalToDraft(
@@ -14,8 +14,7 @@ export function proposalToDraft(
     title = `${proposal.parcelDetails.description}`;
   }
 
-  // Calculate completion percentage based on steps completed
-  const totalSteps = 5; // Total number of steps in the proposal form
+  const totalSteps = 5;
   const stepIndices = {
     'policyholderInfo': 1,
     'parcelDetails': 2,
@@ -42,13 +41,6 @@ export function proposalToDraft(
   };
 }
 
-/**
- * Saves a proposal as a draft
- * @param proposal The proposal form data
- * @param currentStep The current step in the form
- * @param existingDraftId Optional existing draft ID to update
- * @returns The ID of the saved draft
- */
 export function saveProposalAsDraft(
   proposal: Partial<ParcelInsuranceProposal>,
   currentStep: string,
@@ -69,11 +61,6 @@ export function saveProposalAsDraft(
   }
 }
 
-/**
- * Extracts a proposal from a draft
- * @param draft The draft object
- * @returns The proposal form data
- */
 export function draftToProposal(draft: Draft): Partial<ParcelInsuranceProposal> {
   if (draft.type !== 'proposal') {
     throw new Error('Draft is not a proposal');

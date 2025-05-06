@@ -18,7 +18,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { Draft, DraftStatus, DraftType, DraftSortField } from "../types";
+import { Draft, DraftStatus, DraftType, DraftSortField } from "@/features/drafts/types";
 import { 
   Select,
   SelectContent,
@@ -100,14 +100,6 @@ export function DraftsTable() {
         sessionStorage.setItem('resume_draft_id', draft.id);
         navigate({ to: '/proposal' });
         break;
-      case 'policy':
-        // Future implementation for policy drafts
-        navigate({ to: '/' });
-        break;
-      case 'claim':
-        // Future implementation for claim drafts
-        navigate({ to: '/' });
-        break;
       default:
         navigate({ to: '/' });
     }
@@ -137,7 +129,6 @@ export function DraftsTable() {
     switch (type) {
       case 'proposal': return { label: 'Proposal', variant: 'outline' as const };
       case 'policy': return { label: 'Policy', variant: 'secondary' as const };
-      case 'claim': return { label: 'Claim', variant: 'default' as const };
       default: return { label: type, variant: 'outline' as const };
     }
   };
@@ -152,24 +143,7 @@ export function DraftsTable() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full sm:w-auto"
           />
-          
-          <Select
-            value={filters.status || "all-statuses"}
-            onValueChange={(value) => 
-              setFilters({...filters, status: value === "all-statuses" ? undefined : value as DraftStatus})
-            }
-          >
-            <SelectTrigger className="w-full sm:w-[150px]">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all-statuses">All Statuses</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="submitted">Submitted</SelectItem>
-              <SelectItem value="approved">Approved</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
-            </SelectContent>
-          </Select>
+
           
           <Select
             value={filters.type || "all-types"}
@@ -184,8 +158,6 @@ export function DraftsTable() {
               <SelectItem value="all-types">All Types</SelectItem>
               <SelectItem value="proposal">Proposal</SelectItem>
               <SelectItem value="policy">Policy</SelectItem>
-              <SelectItem value="claim">Claim</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
             </SelectContent>
           </Select>
         </div>

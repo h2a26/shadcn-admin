@@ -4,14 +4,14 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { ParcelInsuranceProposalForm } from '@/features/proposal/components/parcel-insurance-proposal-form'
-import { ProposalViewDialog } from '@/features/proposal/components/proposal-view-dialog'
-import ProposalProvider from '@/features/proposal/context/proposal-context'
+import { ProposalProvider } from '@/features/proposal/context/proposal-context'
 import { DraftsProvider } from '@/features/drafts'
 
 // Export types and utilities for use in other modules
-export * from './types'
-export * from './utils/proposal-utils'
-export { default as ProposalProvider } from './context/proposal-context'
+export * from '@/features/proposal/types'
+export * from '@/features/proposal/utils/proposal-utils'
+export * from '@/features/proposal/utils/draft-utils'
+export { ProposalProvider } from '@/features/proposal/context/proposal-context'
 
 export default function Proposal() {
   return (
@@ -40,7 +40,6 @@ export default function Proposal() {
             <ParcelInsuranceProposalForm />
           </div>
 
-          <ProposalViewDialog />
         </Main>
 
       </ProposalProvider>

@@ -11,12 +11,13 @@ import { saveProposalToLocalStorage, generateProposalNumber } from '@/features/p
 import { useRouter } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { updateDraftInStorage } from '@/features/drafts/utils/storage-utils';
-import { ProposalStepperNavigation } from './proposal-stepper-navigation';
-import { ProposalStepperContent } from './proposal-stepper-content';
-import { ProposalStepperControls } from './proposal-stepper-controls';
-import { ProposalStepId } from '../types';
-import { useDraftOperations } from '@/features/proposal/hooks/useDraftOperations'
-import { useProposalForm } from '@/features/proposal/hooks/useProposalForm'
+import { ProposalStepperNavigation } from '@/features/proposal/components/proposal-stepper-navigation';
+import { ProposalStepperContent } from '@/features/proposal/components/proposal-stepper-content';
+import { ProposalStepperControls } from '@/features/proposal/components/proposal-stepper-controls';
+import { ProposalStepId } from '@/features/proposal/types';
+import { useDraftOperations } from '@/features/proposal/hooks/use-draft-operations'
+import { useProposalForm } from '@/features/proposal/hooks/use-proposal-form'
+import { getStepDescription } from '@/features/proposal/utils/stepper-utils'
 
 const { Stepper, useStepper } = defineStepper(
   {
@@ -286,22 +287,7 @@ const FormStepperComponent = () => {
         {/* Current Step Content */}
         <ProposalStepperContent
           currentStep={methods.current}
-          getStepDescription={(stepId) => {
-            switch (stepId) {
-              case 'policyholderInfo':
-                return 'Enter the policyholder\'s personal information';
-              case 'parcelDetails':
-                return 'Provide details about the parcel being insured';
-              case 'shippingCoverage':
-                return 'Specify shipping information and coverage options';
-              case 'premiumCalculation':
-                return 'Review the calculated premium for your insurance';
-              case 'documentsConsent':
-                return 'Upload required documents and provide consent';
-              default:
-                return '';
-            }
-          }}
+          getStepDescription={stepId => getStepDescription(stepId)}
         />
 
         {/* Stepper Controls */}

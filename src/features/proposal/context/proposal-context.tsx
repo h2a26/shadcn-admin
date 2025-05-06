@@ -8,10 +8,8 @@ import {
   deleteProposalFromLocalStorage
 } from '@/features/proposal/utils/proposal-utils'
 
-// Define the types of dialogs that can be opened in the proposal feature
 type ProposalDialogType = 'create' | 'view' | 'edit' | 'delete'
 
-// Interface for the stored proposal with additional metadata
 interface StoredProposal extends ParcelInsuranceProposal {
   id: string
   createdAt: string
@@ -19,44 +17,34 @@ interface StoredProposal extends ParcelInsuranceProposal {
   status: 'draft' | 'submitted' | 'approved' | 'rejected'
 }
 
-// Define the shape of the proposal context
 interface ProposalContextType {
-  // Dialog state
   open: ProposalDialogType | null
   setOpen: (type: ProposalDialogType | null) => void
   
-  // Current proposal being viewed or edited
   currentProposal: StoredProposal | null
   setCurrentProposal: React.Dispatch<React.SetStateAction<StoredProposal | null>>
   
-  // All proposals
   proposals: StoredProposal[]
   
-  // Actions
   refreshProposals: () => void
   saveProposal: (proposal: ParcelInsuranceProposal) => string
   updateProposal: (id: string, proposal: Partial<ParcelInsuranceProposal>) => boolean
   deleteProposal: (id: string) => boolean
 }
 
-// Create the context with null as default value
 const ProposalContext = React.createContext<ProposalContextType | null>(null)
 
 interface Props {
   children: React.ReactNode
 }
 
-export default function ProposalProvider({ children }: Props) {
-  // Dialog state using the project's custom hook
+export function ProposalProvider({ children }: Props) {
   const [open, setOpen] = useDialogState<ProposalDialogType>(null)
   
-  // Current proposal being viewed or edited
   const [currentProposal, setCurrentProposal] = useState<StoredProposal | null>(null)
   
-  // All proposals
   const [proposals, setProposals] = useState<StoredProposal[]>([])
 
-  // Function to refresh proposals from local storage
   const refreshProposals = useCallback(() => {
     const data = getProposalsFromLocalStorage()
     setProposals(data)
@@ -67,14 +55,12 @@ export default function ProposalProvider({ children }: Props) {
     refreshProposals()
   }, [refreshProposals])
 
-  // Function to save a new proposal
   const saveProposal = (proposal: ParcelInsuranceProposal): string => {
     const id = saveProposalToLocalStorage(proposal)
     refreshProposals()
     return id
   }
 
-  // Function to update an existing proposal
   const updateProposal = (id: string, proposal: Partial<ParcelInsuranceProposal>): boolean => {
     const success = updateProposalInLocalStorage(id, proposal)
     if (success) {
@@ -83,7 +69,6 @@ export default function ProposalProvider({ children }: Props) {
     return success
   }
 
-  // Function to delete a proposal
   const deleteProposal = (id: string): boolean => {
     const success = deleteProposalFromLocalStorage(id)
     if (success) {
