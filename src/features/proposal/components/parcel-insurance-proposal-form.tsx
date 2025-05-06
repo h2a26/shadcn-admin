@@ -1,25 +1,23 @@
-import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { defineStepper } from '@/components/ui/stepper';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { useForm, Resolver } from 'react-hook-form';
-import { z } from 'zod';
+import { useEffect, useRef } from 'react';
 import { PolicyholderInfoForm } from '@/features/proposal/components/policy-holder-info-form';
 import { ParcelDetailsForm } from '@/features/proposal/components/parcel-details-form';
 import { ShippingCoverageForm } from '@/features/proposal/components/shipping-coverage-form';
 import { PremiumCalculationForm } from '@/features/proposal/components/premium-calculation-form';
 import { DocumentsConsentForm } from '@/features/proposal/components/documents-consent-form';
 import { stepperSchemas } from '@/features/proposal/schemas/form-schemas';
-import { generateProposalNumber, saveProposalToLocalStorage } from '@/features/proposal';
-import { ParcelInsuranceProposal } from '@/features/proposal/types';
+import { saveProposalToLocalStorage, generateProposalNumber } from '@/features/proposal';
 import { useRouter } from '@tanstack/react-router';
 import { toast } from 'sonner';
-import { SaveIcon } from 'lucide-react';
-import { useDrafts } from '@/features/drafts';
-import { getDraftById } from '@/features/drafts/utils/storage-utils';
 import { updateDraftInStorage } from '@/features/drafts/utils/storage-utils';
+import { useProposalForm } from '../hooks/useProposalForm';
+import { useDraftOperations } from '../hooks/useDraftOperations';
+import { ProposalStepperNavigation } from './proposal-stepper-navigation';
+import { ProposalStepperContent } from './proposal-stepper-content';
+import { ProposalStepperControls } from './proposal-stepper-controls';
 
+// Define the stepper configuration
 const { Stepper, useStepper } = defineStepper(
   {
     id: 'policyholderInfo',
@@ -53,14 +51,6 @@ const { Stepper, useStepper } = defineStepper(
   }
 );
 
-const proposalFormSchema = z.object({
-  policyholderInfo: stepperSchemas.policyholderInfo,
-  parcelDetails: stepperSchemas.parcelDetails,
-  shippingCoverage: stepperSchemas.shippingCoverage,
-  premiumCalculation: stepperSchemas.premiumCalculation,
-  documentsConsent: stepperSchemas.documentsConsent,
-});
-
 export function ParcelInsuranceProposalForm() {
   return (
     <Stepper.Provider>
@@ -72,162 +62,89 @@ export function ParcelInsuranceProposalForm() {
 const FormStepperComponent = () => {
   const methods = useStepper();
   const router = useRouter();
-  const { refreshDrafts } = useDrafts();
-  
-  const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [autoSaveEnabled] = useState(true);
+
+  // Create ref outside of useEffect to avoid ESLint error
   const autoSaveIntervalRef = useRef<number | null>(null);
-  const formDataRef = useRef<Partial<ParcelInsuranceProposal> | null>(null);
 
-  type FormData = ParcelInsuranceProposal;
-  
-  const form = useForm<FormData>({
-    mode: 'onTouched',
-    resolver: zodResolver(proposalFormSchema) as unknown as Resolver<FormData>,
-    shouldUnregister: false,
-    defaultValues: {
-      policyholderInfo: {
-        fullName: '',
-        phoneNumber: '',
-        email: '',
-        nrcNumber: '',
-        address: '',
-      },
-      parcelDetails: {
-        description: '',
-        category: '',
-        declaredValue: 0,
-        weightKg: undefined,
-        lengthCm: undefined,
-        widthCm: undefined,
-        heightCm: undefined,
-        fragileItem: false,
-        highRiskItem: false,
-      },
-      shippingCoverage: {
-        origin: '',
-        destination: '',
-        shippingDate: new Date(),
-        deliveryDate: new Date(new Date().setDate(new Date().getDate() + 3)),
-        coverageType: '',
-        deductible: undefined,
-        riders: [],
-      },
-      premiumCalculation: {
-        proposalNo: '',
-        basePremium: 0,
-        riskLoad: 0,
-        totalPremium: 0,
-        discountCode: '',
-      },
-      documentsConsent: {
-        identityDoc: undefined,
-        ownershipProof: undefined,
-        invoice: undefined,
-        agreeTerms: false,
-        confirmAccuracy: false,
-      },
-    },
-  });
+  // Use the custom hooks for form state and draft operations
+  const {
+    form,
+    formDataRef,
+    getCurrentFormData,
+    hasFormData,
+    validateStep
+  } = useProposalForm();
 
-  const getCurrentFormData = useCallback((): Partial<ParcelInsuranceProposal> => {
-    return form.getValues();
-  }, [form]);
+  const {
+    currentDraftId,
+    saveAsDraft,
+    loadDraft,
+  } = useDraftOperations(
+    form,
+    getCurrentFormData,
+    hasFormData,
+    (stepId) => methods.goTo(stepId as never)
+  );
 
-  const hasFormData = useCallback((): boolean => {
-    const formData = getCurrentFormData();
-    
-    const hasPolicyholderInfo = formData.policyholderInfo && Object.values(formData.policyholderInfo).some(
-      value => typeof value === 'string' && value.trim() !== ''
-    );
-    
-    // Check if parcel details has any non-empty values
-    const hasParcelDetails = formData.parcelDetails && Object.entries(formData.parcelDetails).some(
-      ([_, value]) => {
-        if (typeof value === 'string') return value.trim() !== '';
-        if (typeof value === 'number') return value > 0;
-        if (typeof value === 'boolean') return value;
-        return false;
+  // Check for a draft to resume on component mount
+  useEffect(() => {
+    const resumeDraftId = sessionStorage.getItem('resume_draft_id');
+    if (!resumeDraftId) return;
+
+    // Clear the session storage to avoid loading the draft again on refresh
+    sessionStorage.removeItem('resume_draft_id');
+
+    // Load the draft
+    loadDraft(resumeDraftId);
+  }, [loadDraft]);
+
+  // Generate proposal number when reaching the premium calculation step
+  useEffect(() => {
+    if (methods.current.id === 'premiumCalculation') {
+      const nrcNumber = form.getValues('policyholderInfo.nrcNumber');
+      if (nrcNumber && !form.getValues('premiumCalculation.proposalNo')) {
+        const proposalNo = generateProposalNumber(nrcNumber);
+        form.setValue('premiumCalculation.proposalNo', proposalNo);
       }
-    );
-    
-    return Boolean(hasPolicyholderInfo || hasParcelDetails);
-  }, [getCurrentFormData]);
-
-  const saveAsDraft = useCallback(async (): Promise<string> => {
-    try {
-      const formData = getCurrentFormData();
-      formDataRef.current = formData;
-      
-      // Don't save if there's no meaningful data (prevents empty drafts)
-      if (!currentDraftId && !hasFormData()) {
-        throw new Error('No data to save as draft');
-      }
-      
-      // Import the saveProposalAsDraft function from draft-utils
-      const { saveProposalAsDraft } = await import('../utils/draft-utils');
-      
-      // Use the utility function to save the draft
-      const draftId = saveProposalAsDraft(
-        formData,
-        methods.current.id,
-        currentDraftId || undefined
-      );
-      
-      // Update state if this is a new draft
-      if (!currentDraftId) {
-        setCurrentDraftId(draftId);
-      }
-      
-      setLastSaved(new Date());
-      refreshDrafts();
-      return draftId;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      toast.error(`Failed to save draft: ${errorMessage}`, {
-        closeButton: true,
-        duration: 30000,
-        position: 'top-right'
-      });
-      throw error;
     }
-  }, [currentDraftId, getCurrentFormData, hasFormData, methods, refreshDrafts]);
+
+    // Update formDataRef whenever the step changes
+    formDataRef.current = form.getValues();
+  }, [methods.current.id, form, methods, formDataRef]);
 
   // Auto-save functionality
   useEffect(() => {
-    if (autoSaveEnabled) {
-      // Set up auto-save interval (every 2 minutes)
-      autoSaveIntervalRef.current = window.setInterval(async () => {
-        try {
-          if (currentDraftId || hasFormData()) {
-            await saveAsDraft();
-          }
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          toast.error(`Auto-save failed: ${errorMessage}`, {
-            closeButton: true,
-            duration: 30000,
-            position: 'top-right'
-          });
+    // Set up auto-save interval (every 2 minutes)
+    autoSaveIntervalRef.current = window.setInterval(async () => {
+      try {
+        if (currentDraftId || hasFormData()) {
+          await saveAsDraft(methods.current.id);
         }
-      }, 2 * 60 * 1000); // 2 minutes
-    }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        toast.error(`Auto-save failed: ${errorMessage}`, {
+          closeButton: true,
+          duration: 30000,
+          position: 'top-right'
+        });
+      }
+    }, 2 * 60 * 1000); // 2 minutes
 
     return () => {
-      if (autoSaveIntervalRef.current) {
+      if (autoSaveIntervalRef.current !== null) {
         clearInterval(autoSaveIntervalRef.current);
       }
     };
-  }, [autoSaveEnabled, saveAsDraft, currentDraftId, hasFormData]);
+  }, [saveAsDraft, currentDraftId, hasFormData, methods.current.id, methods]);
 
+  // Save on navigation
   useEffect(() => {
     const handleNavigation = async () => {
       const hasDraftData = formDataRef.current && (currentDraftId || hasFormData());
       if (!hasDraftData) return;
 
       try {
-        const draftId = await saveAsDraft();
+        const draftId = await saveAsDraft(methods.current.id);
         toast.success('Draft saved successfully', {
           description: `Draft ID: ${draftId}`,
           closeButton: true,
@@ -249,17 +166,13 @@ const FormStepperComponent = () => {
     return () => {
       unsubscribe();
     };
-  }, [router.history, saveAsDraft, currentDraftId, hasFormData]);
-
+  }, [router.history, saveAsDraft, currentDraftId, hasFormData, methods.current.id, formDataRef, methods]);
 
   // Handle beforeunload event to save draft when closing the browser
   useEffect(() => {
     const handleBeforeUnload = () => {
       // Only attempt to save if there's an existing draft ID
-      // This prevents creating new empty drafts on page load/unload cycles
       if (formDataRef.current && currentDraftId) {
-        // For beforeunload, we need to use a synchronous approach
-        // We can't use async imports or await here
         try {
           // Create a minimal update with just the essential data
           const updateData = {
@@ -270,9 +183,8 @@ const FormStepperComponent = () => {
             },
             updatedAt: new Date().toISOString(),
           };
-          
+
           // Use the storage utility directly for this synchronous operation
-          // We'll import this at the top level to ensure it's available
           updateDraftInStorage(currentDraftId, updateData);
         } catch {
           // Cannot show errors during beforeunload
@@ -285,136 +197,22 @@ const FormStepperComponent = () => {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [currentDraftId, methods, methods.current.id]);
-
-  // Define valid step IDs type for better type safety
-  type ValidStepId = 'policyholderInfo' | 'parcelDetails' | 'shippingCoverage' | 'premiumCalculation' | 'documentsConsent';
-
-  // Check for a draft to resume on component mount
-  useEffect(() => {
-    const resumeDraftId = sessionStorage.getItem('resume_draft_id');
-    
-    if (!resumeDraftId) return;
-
-    // Clear the session storage to avoid loading the draft again on refresh
-    sessionStorage.removeItem('resume_draft_id');
-    
-    // Define an async function inside the effect to handle the draft loading
-    const loadDraft = async () => {
-      try {
-        const draft = getDraftById(resumeDraftId);
-        
-        if (!draft) {
-          toast.error('Draft not found', {
-            closeButton: true,
-            duration: 30000,
-            position: 'top-right'
-          });
-          return;
-        }
-        
-        if (draft.type !== 'proposal') {
-          toast.error('Invalid draft type', {
-            closeButton: true,
-            duration: 30000,
-            position: 'top-right'
-          });
-          return;
-        }
-        
-        // Set the current draft ID
-        setCurrentDraftId(resumeDraftId);
-        
-        // Import the utility function
-        const draftUtilsModule = await import('../utils/draft-utils');
-        
-        // Convert the draft to proposal data
-        let formData;
-        try {
-          formData = draftUtilsModule.draftToProposal(draft);
-          
-          // Reset the form with the draft data
-          form.reset(formData);
-          formDataRef.current = formData;
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          toast.error(`Failed to process draft: ${errorMessage}`, {
-            closeButton: true,
-            duration: 30000,
-            position: 'top-right'
-          });
-          return;
-        }
-        
-        // Navigate to the last active step with proper type checking
-        const metadata = draft.metadata;
-        if (!metadata || typeof metadata !== 'object') {
-          toast.error('Invalid draft metadata', {
-            closeButton: true,
-            duration: 30000,
-            position: 'top-right'
-          });
-          return;
-        }
-        
-        const lastStep = metadata.currentStep;
-        if (typeof lastStep !== 'string') {
-          // If no valid step is found, stay on the first step
-          return;
-        }
-        
-        // Check if the step ID is valid
-        if (methods.all.some((step) => step.id === lastStep)) {
-          // Navigate to the saved step
-          methods.goTo(lastStep as ValidStepId);
-          
-          // Show a success notification
-          toast.success('Draft loaded successfully', {
-            description: `Resuming from where you left off.`,
-            closeButton: true,
-            duration: 30000,
-            position: 'top-right'
-          });
-        }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        toast.error(`Failed to load draft: ${errorMessage}`, {
-          closeButton: true,
-          duration: 30000,
-          position: 'top-right'
-        });
-      }
-    };
-    
-    // Execute the async function
-    loadDraft();
-  }, [form, methods, setCurrentDraftId]);
-
-  // Generate proposal number when reaching the premium calculation step
-  useEffect(() => {
-    if (methods.current.id === 'premiumCalculation') {
-      const nrcNumber = form.getValues('policyholderInfo.nrcNumber');
-      if (nrcNumber && !form.getValues('premiumCalculation.proposalNo')) {
-        const proposalNo = generateProposalNumber(nrcNumber);
-        form.setValue('premiumCalculation.proposalNo', proposalNo);
-      }
-    }
-    
-    // Update formDataRef whenever the step changes
-    formDataRef.current = form.getValues();
-  }, [methods.current.id, form, methods]);
+  }, [currentDraftId, methods.current.id, formDataRef, methods]);
 
   // Define a properly typed submit handler
-  const onSubmit = form.handleSubmit((data: FormData) => {
+  const onSubmit = form.handleSubmit((data) => {
     try {
       if (methods.isLast) {
         // Save the proposal to local storage
         const proposalId = saveProposalToLocalStorage(data);
-        
-        // Use a more user-friendly notification method in a production environment
-        // This is a placeholder for demonstration purposes
-        alert(`Proposal submitted successfully! ID: ${proposalId}`);
-        
+
+        toast.success('Proposal submitted successfully!', {
+          description: `Proposal ID: ${proposalId}`,
+          closeButton: true,
+          duration: 30000,
+          position: 'top-right'
+        });
+
         // Reset the form and go back to the first step
         form.reset();
         methods.reset();
@@ -424,162 +222,82 @@ const FormStepperComponent = () => {
       }
     } catch (error: unknown) {
       // In a production environment, implement proper error handling and logging
-      // For example, send error to a monitoring service
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      alert(`There was an error submitting your proposal: ${errorMessage}`);
+      toast.error(`There was an error submitting your proposal: ${errorMessage}`, {
+        closeButton: true,
+        duration: 30000,
+        position: 'top-right'
+      });
     }
   });
 
-  // Validate the current step's fields
-  const validateCurrentStep = (): Promise<boolean> => {
-    const currentStepId = methods.current.id;
-    
-    // Use type assertion with a type predicate to ensure type safety
-    const isValidStepId = (id: string): id is keyof FormData => {
-      return ['policyholderInfo', 'parcelDetails', 'shippingCoverage', 
-              'premiumCalculation', 'documentsConsent'].includes(id);
-    };
-    
-    if (isValidStepId(currentStepId)) {
-      return form.trigger(currentStepId);
+  // Handle continue button click
+  const handleContinue = async () => {
+    // If it's the last step, submit the form
+    if (methods.isLast) {
+      await onSubmit();
+    } else {
+      const currentStepId = methods.current.id;
+
+      // Special handling for step 4 (Premium Calculation) to step 5 (Documents & Consent)
+      if (currentStepId === 'premiumCalculation') {
+        // For Premium Calculation step, just proceed to the next step
+        // since all fields are calculated automatically
+        methods.next();
+      } else {
+        // For other steps, validate normally
+        const isValid = await validateStep(currentStepId as never);
+        if (isValid) {
+          methods.next();
+        }
+        // If validation fails, form errors will be displayed automatically
+      }
     }
-    
-    // If the step ID is not recognized, return a resolved promise with false
-    return Promise.resolve(false);
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={onSubmit} className='space-y-6'>
-        <Stepper.Navigation className='mb-8'>
-          {methods.all.map((step) => (
-            <Stepper.Step
-              key={step.id}
-              of={step.id}
-              disabled={
-                methods.all.findIndex((s) => s.id === step.id) >
-                methods.all.findIndex((s) => s.id === methods.current.id)
-              }
-              onClick={() => {
-                if (
-                  methods.all.findIndex((s) => s.id === step.id) <=
-                  methods.all.findIndex((s) => s.id === methods.current.id)
-                ) {
-                  methods.goTo(step.id);
-                }
-              }}
-            >
-              <Stepper.Title>{step.title}</Stepper.Title>
-            </Stepper.Step>
-          ))}
-        </Stepper.Navigation>
+      <form onSubmit={onSubmit} className="space-y-6">
+        {/* Stepper Navigation */}
+        <ProposalStepperNavigation
+          steps={methods.all}
+          currentStepId={methods.current.id}
+          onStepClick={(stepId) => methods.goTo(stepId as never)}
+          StepperNavigation={Stepper.Navigation}
+          StepperStep={Stepper.Step as never}
+          StepperTitle={Stepper.Title}
+        />
 
-        <div className='bg-card p-6 rounded-lg border shadow-sm w-full'>
-          <div className='mb-6'>
-            <h2 className='text-xl font-semibold'>{methods.current.title}</h2>
-            <p className='text-sm text-muted-foreground'>
-              {getStepDescription(methods.current.id)}
-            </p>
-          </div>
+        {/* Current Step Content */}
+        <ProposalStepperContent
+          currentStep={methods.current}
+          getStepDescription={(stepId) => {
+            switch (stepId) {
+              case 'policyholderInfo':
+                return 'Enter the policyholder\'s personal information';
+              case 'parcelDetails':
+                return 'Provide details about the parcel being insured';
+              case 'shippingCoverage':
+                return 'Specify shipping information and coverage options';
+              case 'premiumCalculation':
+                return 'Review the calculated premium for your insurance';
+              case 'documentsConsent':
+                return 'Upload required documents and provide consent';
+              default:
+                return '';
+            }
+          }}
+        />
 
-          {methods.switch({
-            policyholderInfo: ({ Component }) => <Component />,
-            parcelDetails: ({ Component }) => <Component />,
-            shippingCoverage: ({ Component }) => <Component />,
-            premiumCalculation: ({ Component }) => <Component />,
-            documentsConsent: ({ Component }) => <Component />,
-          })}
-        </div>
-
-        <Stepper.Controls className='flex justify-between mt-6'>
-          <div className='flex gap-2'>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={methods.prev}
-              disabled={methods.isFirst}
-            >
-              Previous
-            </Button>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={async () => {
-                try {
-                  const draftId = await saveAsDraft();
-                  toast.success(
-                    lastSaved ? 'Draft updated successfully' : 'Draft saved successfully', 
-                    { 
-                      description: `Draft ID: ${draftId}`,
-                      closeButton: true,
-                      duration: 30000,
-                      position: 'top-right'
-                    }
-                  );
-                } catch (error) {
-                  const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-                  toast.error(`Failed to load draft: ${errorMessage}`,
-                    {
-                      closeButton: true,
-                      duration: 30000,
-                      position: 'top-right'
-                    });
-                }
-              }}
-            >
-              <SaveIcon className="mr-2 h-4 w-4" />
-              Save as Draft
-            </Button>
-          </div>
-          <Button 
-            type='button'
-            onClick={async () => {
-              // If it's the last step, submit the form
-              if (methods.isLast) {
-                // Use await to properly handle the Promise returned by onSubmit
-                await onSubmit();
-              } else {
-                const currentStepId = methods.current.id;
-                
-                // Special handling for step 4 (Premium Calculation) to step 5 (Documents & Consent)
-                if (currentStepId === 'premiumCalculation') {
-                  // For Premium Calculation step, just proceed to the next step
-                  // since all fields are calculated automatically
-                  methods.next();
-                } else {
-                  // For other steps, validate normally
-                  const isValid = await validateCurrentStep();
-                  if (isValid) {
-                    methods.next();
-                  }
-                  // If validation fails, form errors will be displayed automatically
-                  // by React Hook Form, so no additional handling is needed here
-                }
-              }
-            }}
-          >
-            {methods.isLast ? 'Submit Proposal' : 'Continue'}
-          </Button>
-        </Stepper.Controls>
+        {/* Stepper Controls */}
+        <ProposalStepperControls
+          isFirstStep={methods.isFirst}
+          isLastStep={methods.isLast}
+          onPrevious={methods.prev}
+          onContinue={handleContinue}
+          onSaveDraft={() => saveAsDraft(methods.current.id)}
+        />
       </form>
     </Form>
   );
-};
-
-// Helper function to get step descriptions
-const getStepDescription = (stepId: string): string => {
-  switch (stepId) {
-    case 'policyholderInfo':
-      return 'Enter the policyholder\'s personal information';
-    case 'parcelDetails':
-      return 'Provide details about the parcel being insured';
-    case 'shippingCoverage':
-      return 'Specify shipping information and coverage options';
-    case 'premiumCalculation':
-      return 'Review the calculated premium for your insurance';
-    case 'documentsConsent':
-      return 'Upload required documents and provide consent';
-    default:
-      return '';
-  }
 };
