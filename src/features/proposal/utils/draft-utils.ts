@@ -2,17 +2,10 @@ import { Draft, DraftType } from '@/features/drafts';
 import { ParcelInsuranceProposal } from '../types';
 import { saveDraftToStorage, updateDraftInStorage } from '@/features/drafts';
 
-/**
- * Converts a proposal form state to a draft object
- * @param proposal The proposal form data
- * @param currentStep The current step in the form
- * @returns The draft object
- */
 export function proposalToDraft(
   proposal: Partial<ParcelInsuranceProposal>, 
   currentStep: string
 ): Omit<Draft, 'id' | 'createdAt'> {
-  // Generate a title based on available data
   let title = 'Untitled Proposal';
   
   if (proposal.policyholderInfo?.fullName) {

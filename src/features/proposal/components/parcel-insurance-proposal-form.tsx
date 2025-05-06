@@ -11,12 +11,12 @@ import { saveProposalToLocalStorage, generateProposalNumber } from '@/features/p
 import { useRouter } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { updateDraftInStorage } from '@/features/drafts/utils/storage-utils';
-import { useProposalForm } from '../hooks/useProposalForm';
-import { useDraftOperations } from '../hooks/useDraftOperations';
 import { ProposalStepperNavigation } from './proposal-stepper-navigation';
 import { ProposalStepperContent } from './proposal-stepper-content';
 import { ProposalStepperControls } from './proposal-stepper-controls';
 import { ProposalStepId } from '../types';
+import { useDraftOperations } from '@/features/proposal/hooks/useDraftOperations'
+import { useProposalForm } from '@/features/proposal/hooks/useProposalForm'
 
 const { Stepper, useStepper } = defineStepper(
   {
@@ -247,10 +247,25 @@ const FormStepperComponent = () => {
       } else {
         // For other steps, validate normally
         const isValid = await validateStep(currentStepId as ProposalStepId);
-        if (isValid) {
+        
+        // If validation fails, show errors
+        if (!isValid) {
+          // Get all errors for the current step
+          const errors = form.formState.errors;
+          const stepErrors = errors[currentStepId as keyof typeof errors];
+          
+          if (stepErrors) {
+            // Show a toast with validation errors
+            toast.error('Please fix the errors before continuing', {
+              description: 'There are validation errors in the form',
+              closeButton: true,
+              duration: 30000,
+              position: 'top-right'
+            });
+          }
+        } else {
           methods.next();
         }
-        // If validation fails, form errors will be displayed automatically
       }
     }
   };
@@ -264,7 +279,7 @@ const FormStepperComponent = () => {
           currentStepId={methods.current.id}
           onStepClick={(stepId) => methods.goTo(stepId as ProposalStepId)}
           StepperNavigation={Stepper.Navigation}
-          StepperStep={Stepper.Step as any}
+          StepperStep={Stepper.Step as never}
           StepperTitle={Stepper.Title}
         />
 

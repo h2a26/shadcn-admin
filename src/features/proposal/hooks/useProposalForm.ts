@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import React, { useCallback, useRef } from 'react';
 import { ParcelInsuranceProposal, ProposalStepId } from '../types';
+import { stepperSchemas } from '../schemas/form-schemas';
 
 export type ProposalFormData = ParcelInsuranceProposal;
 
@@ -14,17 +15,20 @@ export interface UseProposalFormReturn {
   validateStep: (stepId: ProposalStepId) => Promise<boolean>;
 }
 
-/**
- * Custom hook for managing proposal form state
- * @returns Form utilities and state
- */
+const proposalFormSchema = z.object({
+  policyholderInfo: stepperSchemas.policyholderInfo,
+  parcelDetails: stepperSchemas.parcelDetails,
+  shippingCoverage: stepperSchemas.shippingCoverage,
+  premiumCalculation: stepperSchemas.premiumCalculation,
+  documentsConsent: stepperSchemas.documentsConsent,
+});
+
 export function useProposalForm(): UseProposalFormReturn {
   const formDataRef = useRef<Partial<ProposalFormData> | null>(null);
   
   const form = useForm<ProposalFormData>({
-    mode: 'onTouched',
-    // Using any here is necessary due to type incompatibility between zod schema and ParcelInsuranceProposal
-    resolver: zodResolver(z.object({}) as never),
+    mode: 'onChange',
+    resolver: zodResolver(proposalFormSchema) as never,
     shouldUnregister: false,
     defaultValues: {
       policyholderInfo: {
@@ -71,20 +75,12 @@ export function useProposalForm(): UseProposalFormReturn {
     },
   });
 
-  /**
-   * Get the current form data
-   * @returns Current form values
-   */
   const getCurrentFormData = useCallback((): Partial<ProposalFormData> => {
     const values = form.getValues();
     formDataRef.current = values;
     return values;
   }, [form]);
 
-  /**
-   * Check if the form has meaningful data
-   * @returns True if form has data worth saving
-   */
   const hasFormData = useCallback((): boolean => {
     const formData = getCurrentFormData();
     
@@ -104,11 +100,6 @@ export function useProposalForm(): UseProposalFormReturn {
     return Boolean(hasPolicyholderInfo || hasParcelDetails);
   }, [getCurrentFormData]);
 
-  /**
-   * Validate the current step's fields
-   * @param stepId The step ID to validate
-   * @returns Promise resolving to validation result
-   */
   const validateStep = async (stepId: ProposalStepId): Promise<boolean> => {
     return form.trigger(stepId);
   };

@@ -56,5 +56,4 @@ export type CoverageType = 'Basic' | 'Standard' | 'Premium' | 'Custom';
 export type ParcelCategory = 'Electronics' | 'Documents' | 'Clothing' | 'Fragile' | 'Perishable' | 'Other';
 export type RiderOption = 'Water Damage' | 'Theft Protection' | 'Extended Coverage' | 'Express Claims';
 
-// Define a literal type for step IDs to use throughout the application
 export type ProposalStepId = 'policyholderInfo' | 'parcelDetails' | 'shippingCoverage' | 'premiumCalculation' | 'documentsConsent';
