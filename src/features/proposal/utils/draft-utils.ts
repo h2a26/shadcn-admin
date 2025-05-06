@@ -16,9 +16,9 @@ export function proposalToDraft(
   let title = 'Untitled Proposal';
   
   if (proposal.policyholderInfo?.fullName) {
-    title = `Proposal for ${proposal.policyholderInfo.fullName}`;
+    title = `${proposal.policyholderInfo.fullName}`;
   } else if (proposal.parcelDetails?.description) {
-    title = `Proposal: ${proposal.parcelDetails.description}`;
+    title = `${proposal.parcelDetails.description}`;
   }
 
   // Calculate completion percentage based on steps completed

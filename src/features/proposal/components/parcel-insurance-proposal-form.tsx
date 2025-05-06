@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { SaveIcon } from 'lucide-react';
 import { useDrafts } from '@/features/drafts';
 import { getDraftById } from '@/features/drafts/utils/storage-utils';
+import { updateDraftInStorage } from '@/features/drafts/utils/storage-utils';
 
 const { Stepper, useStepper } = defineStepper(
   {
@@ -184,7 +185,11 @@ const FormStepperComponent = () => {
       return draftId;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      toast.error(`Failed to save draft: ${errorMessage}`);
+      toast.error(`Failed to save draft: ${errorMessage}`, {
+        closeButton: true,
+        duration: 30000,
+        position: 'top-right'
+      });
       throw error;
     }
   }, [currentDraftId, getCurrentFormData, hasFormData, methods, refreshDrafts]);
@@ -200,7 +205,11 @@ const FormStepperComponent = () => {
           }
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          throw new Error(`Auto-save failed: ${errorMessage}`);
+          toast.error(`Auto-save failed: ${errorMessage}`, {
+            closeButton: true,
+            duration: 30000,
+            position: 'top-right'
+          });
         }
       }, 2 * 60 * 1000); // 2 minutes
     }
@@ -212,22 +221,36 @@ const FormStepperComponent = () => {
     };
   }, [autoSaveEnabled, saveAsDraft, currentDraftId, hasFormData]);
 
-  // Save on navigation
   useEffect(() => {
-    const unsubscribe = router.history.subscribe(() => {
-      // Only save draft when navigating away if there's meaningful data or updating existing draft
-      if (formDataRef.current && (currentDraftId || hasFormData())) {
-        saveAsDraft().catch((error) => {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          throw new Error(`Auto-save failed: ${errorMessage}`);
+    const handleNavigation = async () => {
+      const hasDraftData = formDataRef.current && (currentDraftId || hasFormData());
+      if (!hasDraftData) return;
+
+      try {
+        const draftId = await saveAsDraft();
+        toast.success('Draft saved successfully', {
+          description: `Draft ID: ${draftId}`,
+          closeButton: true,
+          duration: 30000,
+          position: 'top-right',
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        toast.error(`Auto-save failed: ${errorMessage}`, {
+          closeButton: true,
+          duration: 30000,
+          position: 'top-right',
         });
       }
-    });
+    };
+
+    const unsubscribe = router.history.subscribe(handleNavigation);
 
     return () => {
       unsubscribe();
     };
   }, [router.history, saveAsDraft, currentDraftId, hasFormData]);
+
 
   // Handle beforeunload event to save draft when closing the browser
   useEffect(() => {
@@ -250,7 +273,6 @@ const FormStepperComponent = () => {
           
           // Use the storage utility directly for this synchronous operation
           // We'll import this at the top level to ensure it's available
-          const { updateDraftInStorage } = require('@/features/drafts');
           updateDraftInStorage(currentDraftId, updateData);
         } catch {
           // Cannot show errors during beforeunload
@@ -283,12 +305,20 @@ const FormStepperComponent = () => {
         const draft = getDraftById(resumeDraftId);
         
         if (!draft) {
-          toast.error('Draft not found');
+          toast.error('Draft not found', {
+            closeButton: true,
+            duration: 30000,
+            position: 'top-right'
+          });
           return;
         }
         
         if (draft.type !== 'proposal') {
-          toast.error('Invalid draft type');
+          toast.error('Invalid draft type', {
+            closeButton: true,
+            duration: 30000,
+            position: 'top-right'
+          });
           return;
         }
         
@@ -308,14 +338,22 @@ const FormStepperComponent = () => {
           formDataRef.current = formData;
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          toast.error(`Failed to process draft: ${errorMessage}`);
+          toast.error(`Failed to process draft: ${errorMessage}`, {
+            closeButton: true,
+            duration: 30000,
+            position: 'top-right'
+          });
           return;
         }
         
         // Navigate to the last active step with proper type checking
         const metadata = draft.metadata;
         if (!metadata || typeof metadata !== 'object') {
-          toast.error('Invalid draft metadata');
+          toast.error('Invalid draft metadata', {
+            closeButton: true,
+            duration: 30000,
+            position: 'top-right'
+          });
           return;
         }
         
@@ -332,12 +370,19 @@ const FormStepperComponent = () => {
           
           // Show a success notification
           toast.success('Draft loaded successfully', {
-            description: `Resuming from where you left off.`
+            description: `Resuming from where you left off.`,
+            closeButton: true,
+            duration: 30000,
+            position: 'top-right'
           });
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        toast.error(`Failed to load draft: ${errorMessage}`);
+        toast.error(`Failed to load draft: ${errorMessage}`, {
+          closeButton: true,
+          duration: 30000,
+          position: 'top-right'
+        });
       }
     };
     
@@ -467,13 +512,18 @@ const FormStepperComponent = () => {
                     { 
                       description: `Draft ID: ${draftId}`,
                       closeButton: true,
-                      duration: 80000,
+                      duration: 30000,
                       position: 'top-right'
                     }
                   );
                 } catch (error) {
                   const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-                  toast.error(`Failed to load draft: ${errorMessage}`);
+                  toast.error(`Failed to load draft: ${errorMessage}`,
+                    {
+                      closeButton: true,
+                      duration: 30000,
+                      position: 'top-right'
+                    });
                 }
               }}
             >
