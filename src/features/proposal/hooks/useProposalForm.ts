@@ -2,10 +2,9 @@ import { useForm, UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import React, { useCallback, useRef } from 'react';
-import { ParcelInsuranceProposal } from '../types';
+import { ParcelInsuranceProposal, ProposalStepId } from '../types';
 
 export type ProposalFormData = ParcelInsuranceProposal;
-export type ProposalStepId = keyof ProposalFormData;
 
 export interface UseProposalFormReturn {
   form: UseFormReturn<ProposalFormData>;

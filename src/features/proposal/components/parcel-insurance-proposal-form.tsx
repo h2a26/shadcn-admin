@@ -16,35 +16,35 @@ import { useDraftOperations } from '../hooks/useDraftOperations';
 import { ProposalStepperNavigation } from './proposal-stepper-navigation';
 import { ProposalStepperContent } from './proposal-stepper-content';
 import { ProposalStepperControls } from './proposal-stepper-controls';
+import { ProposalStepId } from '../types';
 
-// Define the stepper configuration
 const { Stepper, useStepper } = defineStepper(
   {
-    id: 'policyholderInfo',
+    id: 'policyholderInfo' as ProposalStepId,
     title: 'Policyholder Info',
     schema: stepperSchemas.policyholderInfo,
     Component: PolicyholderInfoForm,
   },
   {
-    id: 'parcelDetails',
+    id: 'parcelDetails' as ProposalStepId,
     title: 'Parcel Details',
     schema: stepperSchemas.parcelDetails,
     Component: ParcelDetailsForm,
   },
   {
-    id: 'shippingCoverage',
+    id: 'shippingCoverage' as ProposalStepId,
     title: 'Shipping & Coverage',
     schema: stepperSchemas.shippingCoverage,
     Component: ShippingCoverageForm,
   },
   {
-    id: 'premiumCalculation',
+    id: 'premiumCalculation' as ProposalStepId,
     title: 'Premium Calculation',
     schema: stepperSchemas.premiumCalculation,
     Component: PremiumCalculationForm,
   },
   {
-    id: 'documentsConsent',
+    id: 'documentsConsent' as ProposalStepId,
     title: 'Documents & Consent',
     schema: stepperSchemas.documentsConsent,
     Component: DocumentsConsentForm,
@@ -63,10 +63,8 @@ const FormStepperComponent = () => {
   const methods = useStepper();
   const router = useRouter();
 
-  // Create ref outside of useEffect to avoid ESLint error
   const autoSaveIntervalRef = useRef<number | null>(null);
 
-  // Use the custom hooks for form state and draft operations
   const {
     form,
     formDataRef,
@@ -83,7 +81,7 @@ const FormStepperComponent = () => {
     form,
     getCurrentFormData,
     hasFormData,
-    (stepId) => methods.goTo(stepId as never)
+    (stepId) => methods.goTo(stepId as ProposalStepId)
   );
 
   // Check for a draft to resume on component mount
@@ -95,7 +93,9 @@ const FormStepperComponent = () => {
     sessionStorage.removeItem('resume_draft_id');
 
     // Load the draft
-    loadDraft(resumeDraftId);
+    (async () => {
+      await loadDraft(resumeDraftId);
+    })();
   }, [loadDraft]);
 
   // Generate proposal number when reaching the premium calculation step
@@ -118,7 +118,7 @@ const FormStepperComponent = () => {
     autoSaveIntervalRef.current = window.setInterval(async () => {
       try {
         if (currentDraftId || hasFormData()) {
-          await saveAsDraft(methods.current.id);
+          await saveAsDraft(methods.current.id as ProposalStepId);
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -144,7 +144,7 @@ const FormStepperComponent = () => {
       if (!hasDraftData) return;
 
       try {
-        const draftId = await saveAsDraft(methods.current.id);
+        const draftId = await saveAsDraft(methods.current.id as ProposalStepId);
         toast.success('Draft saved successfully', {
           description: `Draft ID: ${draftId}`,
           closeButton: true,
@@ -246,7 +246,7 @@ const FormStepperComponent = () => {
         methods.next();
       } else {
         // For other steps, validate normally
-        const isValid = await validateStep(currentStepId as never);
+        const isValid = await validateStep(currentStepId as ProposalStepId);
         if (isValid) {
           methods.next();
         }
@@ -262,9 +262,9 @@ const FormStepperComponent = () => {
         <ProposalStepperNavigation
           steps={methods.all}
           currentStepId={methods.current.id}
-          onStepClick={(stepId) => methods.goTo(stepId as never)}
+          onStepClick={(stepId) => methods.goTo(stepId as ProposalStepId)}
           StepperNavigation={Stepper.Navigation}
-          StepperStep={Stepper.Step as never}
+          StepperStep={Stepper.Step as any}
           StepperTitle={Stepper.Title}
         />
 
@@ -295,7 +295,7 @@ const FormStepperComponent = () => {
           isLastStep={methods.isLast}
           onPrevious={methods.prev}
           onContinue={handleContinue}
-          onSaveDraft={() => saveAsDraft(methods.current.id)}
+          onSaveDraft={() => saveAsDraft(methods.current.id as ProposalStepId)}
         />
       </form>
     </Form>

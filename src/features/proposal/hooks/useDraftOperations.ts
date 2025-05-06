@@ -2,13 +2,13 @@ import React, { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useDrafts } from '@/features/drafts';
 import { getDraftById } from '@/features/drafts/utils/storage-utils';
-import { ParcelInsuranceProposal } from '../types';
+import { ParcelInsuranceProposal, ProposalStepId } from '../types';
 import { UseFormReturn } from 'react-hook-form';
 
 export interface UseDraftOperationsReturn {
   currentDraftId: string | null;
   lastSaved: Date | null;
-  saveAsDraft: (currentStep: string) => Promise<string>;
+  saveAsDraft: (currentStep: ProposalStepId) => Promise<string>;
   loadDraft: (draftId: string) => Promise<void>;
   setCurrentDraftId: React.Dispatch<React.SetStateAction<string | null>>;
 }
@@ -20,7 +20,7 @@ export function useDraftOperations(
   form: UseFormReturn<ParcelInsuranceProposal>,
   getCurrentFormData: () => Partial<ParcelInsuranceProposal>,
   hasFormData: () => boolean,
-  setCurrentStep: (stepId: string) => void
+  setCurrentStep: (stepId: ProposalStepId) => void
 ): UseDraftOperationsReturn {
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -29,7 +29,7 @@ export function useDraftOperations(
   /**
    * Save the current form state as a draft
    */
-  const saveAsDraft = useCallback(async (currentStep: string): Promise<string> => {
+  const saveAsDraft = useCallback(async (currentStep: ProposalStepId): Promise<string> => {
     try {
       const formData = getCurrentFormData();
       
@@ -66,6 +66,14 @@ export function useDraftOperations(
       throw error;
     }
   }, [currentDraftId, getCurrentFormData, hasFormData, refreshDrafts]);
+
+  /**
+   * Type guard for valid step IDs
+   */
+  function isValidStepId(id: string): id is ProposalStepId {
+    return ['policyholderInfo', 'parcelDetails', 'shippingCoverage', 
+            'premiumCalculation', 'documentsConsent'].includes(id as ProposalStepId);
+  }
 
   /**
    * Load a draft by ID
@@ -127,7 +135,7 @@ export function useDraftOperations(
       }
       
       const lastStep = metadata.currentStep;
-      if (typeof lastStep === 'string') {
+      if (typeof lastStep === 'string' && isValidStepId(lastStep)) {
         // Navigate to the saved step
         setCurrentStep(lastStep);
         
