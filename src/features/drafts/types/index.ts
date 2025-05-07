@@ -9,7 +9,7 @@ export interface DraftBase {
   type: DraftType;
 }
 
-export type DraftType = 'proposal' | 'policy' | 'claim' | 'other';
+export type DraftType = 'proposal' | 'policy' | 'other';
 
 export interface Draft extends DraftBase {
   content: unknown;

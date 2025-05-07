@@ -1,11 +1,7 @@
 import { useForm, UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import React, { useCallback, useRef } from 'react';
-import { ParcelInsuranceProposal, ProposalStepId } from '@/features/proposal/types';
-import { stepperSchemas } from '@/features/proposal/schemas/form-schemas';
-
-export type ProposalFormData = ParcelInsuranceProposal;
+import { ProposalFormData, proposalFormSchema, ProposalStepId } from '@/features/proposal/data/schema.ts'
 
 export interface UseProposalFormReturn {
   form: UseFormReturn<ProposalFormData>;
@@ -14,14 +10,6 @@ export interface UseProposalFormReturn {
   hasFormData: () => boolean;
   validateStep: (stepId: ProposalStepId) => Promise<boolean>;
 }
-
-const proposalFormSchema = z.object({
-  policyholderInfo: stepperSchemas.policyholderInfo,
-  parcelDetails: stepperSchemas.parcelDetails,
-  shippingCoverage: stepperSchemas.shippingCoverage,
-  premiumCalculation: stepperSchemas.premiumCalculation,
-  documentsConsent: stepperSchemas.documentsConsent,
-});
 
 export function useProposalForm(): UseProposalFormReturn {
   const formDataRef = useRef<Partial<ProposalFormData> | null>(null);

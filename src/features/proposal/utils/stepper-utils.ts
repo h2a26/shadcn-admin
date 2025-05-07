@@ -1,4 +1,4 @@
-import { ProposalStepId } from '@/features/proposal'
+import { ProposalStepId } from '@/features/proposal/data/schema'
 
 export function getStepDescription(stepId: string): string {
   switch (stepId) {

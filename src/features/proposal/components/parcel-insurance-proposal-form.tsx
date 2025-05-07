@@ -6,7 +6,6 @@ import { ParcelDetailsForm } from '@/features/proposal/components/parcel-details
 import { ShippingCoverageForm } from '@/features/proposal/components/shipping-coverage-form';
 import { PremiumCalculationForm } from '@/features/proposal/components/premium-calculation-form';
 import { DocumentsConsentForm } from '@/features/proposal/components/documents-consent-form';
-import { stepperSchemas } from '@/features/proposal/schemas/form-schemas';
 import { saveProposalToLocalStorage, generateProposalNumber } from '@/features/proposal';
 import { useRouter } from '@tanstack/react-router';
 import { toast } from 'sonner';
@@ -14,40 +13,46 @@ import { updateDraftInStorage } from '@/features/drafts/utils/storage-utils';
 import { ProposalStepperNavigation } from '@/features/proposal/components/proposal-stepper-navigation';
 import { ProposalStepperContent } from '@/features/proposal/components/proposal-stepper-content';
 import { ProposalStepperControls } from '@/features/proposal/components/proposal-stepper-controls';
-import { ProposalStepId } from '@/features/proposal/types';
 import { useDraftOperations } from '@/features/proposal/hooks/use-draft-operations'
 import { useProposalForm } from '@/features/proposal/hooks/use-proposal-form'
 import { getStepDescription } from '@/features/proposal/utils/stepper-utils'
+import {
+  policyholderInfoSchema,
+  parcelDetailsSchema,
+  shippingCoverageSchema,
+  premiumCalculationSchema,
+  documentsConsentSchema, ProposalStepId,
+} from '@/features/proposal/data/schema.ts'
 
 const { Stepper, useStepper } = defineStepper(
   {
     id: 'policyholderInfo' as ProposalStepId,
     title: 'Policyholder Info',
-    schema: stepperSchemas.policyholderInfo,
+    schema: policyholderInfoSchema,
     Component: PolicyholderInfoForm,
   },
   {
     id: 'parcelDetails' as ProposalStepId,
     title: 'Parcel Details',
-    schema: stepperSchemas.parcelDetails,
+    schema: parcelDetailsSchema,
     Component: ParcelDetailsForm,
   },
   {
     id: 'shippingCoverage' as ProposalStepId,
     title: 'Shipping & Coverage',
-    schema: stepperSchemas.shippingCoverage,
+    schema: shippingCoverageSchema,
     Component: ShippingCoverageForm,
   },
   {
     id: 'premiumCalculation' as ProposalStepId,
     title: 'Premium Calculation',
-    schema: stepperSchemas.premiumCalculation,
+    schema: premiumCalculationSchema,
     Component: PremiumCalculationForm,
   },
   {
     id: 'documentsConsent' as ProposalStepId,
     title: 'Documents & Consent',
-    schema: stepperSchemas.documentsConsent,
+    schema: documentsConsentSchema,
     Component: DocumentsConsentForm,
   }
 );

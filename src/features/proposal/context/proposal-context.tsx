@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import useDialogState from '@/hooks/use-dialog-state'
-import { ParcelInsuranceProposal } from '@/features/proposal/types'
 import {
   getProposalsFromLocalStorage,
   saveProposalToLocalStorage,
   updateProposalInLocalStorage,
   deleteProposalFromLocalStorage
 } from '@/features/proposal/utils/proposal-utils'
+import { ProposalFormData } from '@/features/proposal/data/schema.ts'
 
 type ProposalDialogType = 'create' | 'view' | 'edit' | 'delete'
 
-interface StoredProposal extends ParcelInsuranceProposal {
+interface StoredProposal extends ProposalFormData {
   id: string
   createdAt: string
   updatedAt?: string
@@ -27,8 +27,8 @@ interface ProposalContextType {
   proposals: StoredProposal[]
   
   refreshProposals: () => void
-  saveProposal: (proposal: ParcelInsuranceProposal) => string
-  updateProposal: (id: string, proposal: Partial<ParcelInsuranceProposal>) => boolean
+  saveProposal: (proposal: ProposalFormData) => string
+  updateProposal: (id: string, proposal: Partial<ProposalFormData>) => boolean
   deleteProposal: (id: string) => boolean
 }
 
@@ -55,13 +55,13 @@ export function ProposalProvider({ children }: Props) {
     refreshProposals()
   }, [refreshProposals])
 
-  const saveProposal = (proposal: ParcelInsuranceProposal): string => {
+  const saveProposal = (proposal: ProposalFormData): string => {
     const id = saveProposalToLocalStorage(proposal)
     refreshProposals()
     return id
   }
 
-  const updateProposal = (id: string, proposal: Partial<ParcelInsuranceProposal>): boolean => {
+  const updateProposal = (id: string, proposal: Partial<ProposalFormData>): boolean => {
     const success = updateProposalInLocalStorage(id, proposal)
     if (success) {
       refreshProposals()

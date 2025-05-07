@@ -1,9 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Controller, useFormContext } from 'react-hook-form';
-import { DocumentsConsent } from '@/features/proposal/types';
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
+import { DocumentsConsent } from '@/features/proposal/data/schema'
 
 export function DocumentsConsentForm() {
   const {
@@ -62,7 +62,7 @@ export function DocumentsConsentForm() {
                 )}
               />
             </div>
-            {errors.documentsConsent?.identityDoc && (
+            {errors.documentsConsent?.identityDoc?.message === 'string' && (
               <span className='text-sm text-destructive'>
                 {errors.documentsConsent.identityDoc.message}
               </span>
@@ -110,7 +110,7 @@ export function DocumentsConsentForm() {
                 )}
               />
             </div>
-            {errors.documentsConsent?.ownershipProof && (
+            {errors.documentsConsent?.ownershipProof?.message === 'string' && (
               <span className='text-sm text-destructive'>
                 {errors.documentsConsent.ownershipProof.message}
               </span>

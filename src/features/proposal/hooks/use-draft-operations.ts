@@ -3,12 +3,9 @@ import { UseFormReturn } from 'react-hook-form'
 import { toast } from 'sonner'
 import { useDrafts } from '@/features/drafts'
 import { getDraftById } from '@/features/drafts/utils/storage-utils'
-import {
-  ParcelInsuranceProposal,
-  ProposalStepId,
-} from '@/features/proposal/types'
 import { saveProposalAsDraft, draftToProposal } from '@/features/proposal/utils/draft-utils'
 import { isValidStepId } from '@/features/proposal/utils/stepper-utils'
+import { ProposalFormData, ProposalStepId } from '@/features/proposal/data/schema'
 
 export interface UseDraftOperationsReturn {
   currentDraftId: string | null
@@ -19,8 +16,8 @@ export interface UseDraftOperationsReturn {
 }
 
 export function useDraftOperations(
-  form: UseFormReturn<ParcelInsuranceProposal>,
-  getCurrentFormData: () => Partial<ParcelInsuranceProposal>,
+  form: UseFormReturn<ProposalFormData>,
+  getCurrentFormData: () => Partial<ProposalFormData>,
   hasFormData: () => boolean,
   setCurrentStep: (stepId: ProposalStepId) => void
 ): UseDraftOperationsReturn {
@@ -34,7 +31,12 @@ export function useDraftOperations(
         const formData = getCurrentFormData()
 
         if (!currentDraftId && !hasFormData()) {
-          throw new Error('No data to save as draft')
+          toast.error('No data to save as draft', {
+            closeButton: true,
+            duration: 30000,
+            position: 'top-right',
+          })
+          return Promise.reject(new Error('No data to save as draft'))
         }
 
         const draftId = saveProposalAsDraft(
@@ -63,84 +65,81 @@ export function useDraftOperations(
     [currentDraftId, getCurrentFormData, hasFormData, refreshDrafts]
   )
 
-  const loadDraft = useCallback(
-    async (draftId: string): Promise<void> => {
+  const loadDraft = useCallback(async (draftId: string): Promise<void> => {
+    try {
+      const draft = getDraftById(draftId)
+
+      if (!draft) {
+        toast.error('Draft not found', {
+          closeButton: true,
+          duration: 30000,
+          position: 'top-right',
+        })
+        return
+      }
+
+      if (draft.type !== 'proposal') {
+        toast.error('Invalid draft type', {
+          closeButton: true,
+          duration: 30000,
+          position: 'top-right',
+        })
+        return
+      }
+
+      setCurrentDraftId(draftId)
+
+      let formData: Partial<ProposalFormData>
       try {
-        const draft = getDraftById(draftId)
+        formData = draftToProposal(draft)
 
-        if (!draft) {
-          toast.error('Draft not found', {
-            closeButton: true,
-            duration: 30000,
-            position: 'top-right',
-          })
-          return
-        }
-
-        if (draft.type !== 'proposal') {
-          toast.error('Invalid draft type', {
-            closeButton: true,
-            duration: 30000,
-            position: 'top-right',
-          })
-          return
-        }
-
-        setCurrentDraftId(draftId)
-
-        let formData: Partial<ParcelInsuranceProposal>
-        try {
-          formData = draftToProposal(draft)
-
-          // Reset the form with the draft data
-          form.reset(formData)
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : 'Unknown error'
-          toast.error(`Failed to process draft: ${errorMessage}`, {
-            closeButton: true,
-            duration: 30000,
-            position: 'top-right',
-          })
-          return
-        }
-
-        // Navigate to the last active step with proper type checking
-        const metadata = draft.metadata
-        if (!metadata || typeof metadata !== 'object') {
-          toast.error('Invalid draft metadata', {
-            closeButton: true,
-            duration: 30000,
-            position: 'top-right',
-          })
-          return
-        }
-
-        const lastStep = metadata.currentStep
-        if (typeof lastStep === 'string' && isValidStepId(lastStep)) {
-          // Navigate to the saved step
-          setCurrentStep(lastStep)
-
-          // Show a success notification
-          toast.success('Draft loaded successfully', {
-            description: `Resuming from where you left off.`,
-            closeButton: true,
-            duration: 30000,
-            position: 'top-right',
-          })
-        }
+        // Reset the form with the draft data
+        form.reset(formData)
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : 'Unknown error'
-        toast.error(`Failed to load draft: ${errorMessage}`, {
+        toast.error(`Failed to process draft: ${errorMessage}`, {
+          closeButton: true,
+          duration: 30000,
+          position: 'top-right',
+        })
+        return
+      }
+
+      // Navigate to the last active step with proper type checking
+      const metadata = draft.metadata
+      if (!metadata || typeof metadata !== 'object') {
+        toast.error('Invalid draft metadata', {
+          closeButton: true,
+          duration: 30000,
+          position: 'top-right',
+        })
+        return
+      }
+
+      const lastStep = metadata.currentStep
+      if (typeof lastStep === 'string' && isValidStepId(lastStep)) {
+        // Navigate to the saved step
+        setCurrentStep(lastStep)
+
+        // Show a success notification
+        toast.success('Draft loaded successfully', {
+          description: `Resuming from where you left off.`,
           closeButton: true,
           duration: 30000,
           position: 'top-right',
         })
       }
-    },
-    [form, setCurrentStep]
-  )
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error'
+      toast.error(`Failed to load draft: ${errorMessage}`, {
+        closeButton: true,
+        duration: 30000,
+        position: 'top-right',
+      })
+    }
+  }, [form, setCurrentStep])
 
   return {
     currentDraftId,

@@ -1,7 +1,6 @@
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFormContext } from 'react-hook-form';
-import { ShippingCoverage, CoverageType, RiderOption } from '@/features/proposal/types';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -16,6 +15,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { CoverageType, RiderOption, ShippingCoverage } from '@/features/proposal/data/schema.ts'
 
 export function ShippingCoverageForm() {
   const {

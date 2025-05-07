@@ -1,6 +1,6 @@
-import { ParcelDetails, ParcelInsuranceProposal, ShippingCoverage } from '@/features/proposal/types';
+import { ParcelDetails, ProposalFormData, ShippingCoverage } from '@/features/proposal/data/schema.ts'
 
-interface StoredProposal extends ParcelInsuranceProposal {
+interface StoredProposal extends ProposalFormData {
   id: string;
   createdAt: string;
   updatedAt?: string;
@@ -117,7 +117,7 @@ export const calculatePremium = (
   };
 };
 
-export const saveProposalToLocalStorage = (proposalData: ParcelInsuranceProposal): string => {
+export const saveProposalToLocalStorage = (proposalData: ProposalFormData): string => {
   try {
     const existingProposals = JSON.parse(
       localStorage.getItem('parcelInsuranceProposals') || '[]'
@@ -175,7 +175,7 @@ export const getProposalsFromLocalStorage = (): StoredProposal[] => {
 
 export const updateProposalInLocalStorage = (
   id: string,
-  updatedData: Partial<ParcelInsuranceProposal>
+  updatedData: Partial<ProposalFormData>
 ): boolean => {
   try {
     const proposals = getProposalsFromLocalStorage();

@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Controller, useFormContext } from 'react-hook-form';
-import { ParcelDetails, ParcelCategory } from '@/features/proposal/types';
+import { ParcelCategory, ParcelDetails } from '@/features/proposal/data/schema'
 
 export function ParcelDetailsForm() {
   const {

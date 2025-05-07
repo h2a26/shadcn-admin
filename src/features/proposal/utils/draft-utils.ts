@@ -1,9 +1,9 @@
 import { Draft, DraftType } from '@/features/drafts';
-import { ParcelInsuranceProposal } from '@/features/proposal/types';
 import { saveDraftToStorage, updateDraftInStorage } from '@/features/drafts';
+import { ProposalFormData } from '@/features/proposal/data/schema'
 
 export function proposalToDraft(
-  proposal: Partial<ParcelInsuranceProposal>, 
+  proposal: Partial<ProposalFormData>,
   currentStep: string
 ): Omit<Draft, 'id' | 'createdAt'> {
   let title = 'Untitled Proposal';
@@ -42,7 +42,7 @@ export function proposalToDraft(
 }
 
 export function saveProposalAsDraft(
-  proposal: Partial<ParcelInsuranceProposal>,
+  proposal: Partial<ProposalFormData>,
   currentStep: string,
   existingDraftId?: string
 ): string {
@@ -61,10 +61,10 @@ export function saveProposalAsDraft(
   }
 }
 
-export function draftToProposal(draft: Draft): Partial<ParcelInsuranceProposal> {
+export function draftToProposal(draft: Draft): Partial<ProposalFormData> {
   if (draft.type !== 'proposal') {
     throw new Error('Draft is not a proposal');
   }
   
-  return draft.content as Partial<ParcelInsuranceProposal>;
+  return draft.content as Partial<ProposalFormData>;
 }

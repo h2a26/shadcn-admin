@@ -1,8 +1,8 @@
 import { Input } from '@/components/ui/input';
 import { useFormContext } from 'react-hook-form';
-import { PremiumCalculation, ParcelDetails, ShippingCoverage } from '@/features/proposal/types';
 import { useEffect } from 'react';
 import { calculatePremium } from '@/features/proposal';
+import { ParcelDetails, PremiumCalculation, ShippingCoverage } from '@/features/proposal/data/schema.ts'
 
 export function PremiumCalculationForm() {
   const {
