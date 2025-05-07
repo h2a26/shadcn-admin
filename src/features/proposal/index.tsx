@@ -7,9 +7,6 @@ import { DraftsProvider } from '@/features/drafts'
 import { ParcelInsuranceProposalForm } from '@/features/proposal/components/parcel-insurance-proposal-form'
 import { ProposalProvider } from '@/features/proposal/context/proposal-context'
 
-// Export only the component
-export { ProposalProvider }
-
 export default function Proposal() {
   return (
     <DraftsProvider>

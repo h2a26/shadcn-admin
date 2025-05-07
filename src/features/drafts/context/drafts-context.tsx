@@ -1,12 +1,12 @@
 import React, { useState, useEffect, createContext, useContext } from 'react'
 import useDialogState from '@/hooks/use-dialog-state'
+import { Draft, DraftFilters, DraftSortOptions } from '@/features/drafts/types'
 import {
   getDraftsFromStorage,
   saveDraftToStorage,
   updateDraftInStorage,
   deleteDraftFromStorage,
 } from '@/features/drafts/utils'
-import { Draft, DraftFilters, DraftSortOptions } from '@/features/drafts/types'
 
 type DraftsDialogType = 'create' | 'view' | 'edit' | 'delete'
 
@@ -115,11 +115,7 @@ export function DraftsProvider({ children }: DraftsProviderProps) {
     deleteDraft,
   }
 
-  return (
-    <DraftsContext value={contextValue}>
-      {children}
-    </DraftsContext>
-  )
+  return <DraftsContext value={contextValue}>{children}</DraftsContext>
 }
 
 // eslint-disable-next-line react-refresh/only-export-components

@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import useDialogState from '@/hooks/use-dialog-state'
 import { ProposalFormData } from '@/features/proposal/data/schema.ts'
 import {
   getProposalsFromLocalStorage,
@@ -7,8 +6,6 @@ import {
   updateProposalInLocalStorage,
   deleteProposalFromLocalStorage,
 } from '@/features/proposal/utils/proposal-utils'
-
-type ProposalDialogType = 'create' | 'view' | 'edit' | 'delete'
 
 interface StoredProposal extends ProposalFormData {
   id: string
@@ -18,9 +15,6 @@ interface StoredProposal extends ProposalFormData {
 }
 
 interface ProposalContextType {
-  open: ProposalDialogType | null
-  setOpen: (type: ProposalDialogType | null) => void
-
   currentProposal: StoredProposal | null
   setCurrentProposal: React.Dispatch<
     React.SetStateAction<StoredProposal | null>
@@ -41,8 +35,6 @@ interface Props {
 }
 
 export function ProposalProvider({ children }: Props) {
-  const [open, setOpen] = useDialogState<ProposalDialogType>(null)
-
   const [currentProposal, setCurrentProposal] = useState<StoredProposal | null>(
     null
   )
@@ -87,8 +79,6 @@ export function ProposalProvider({ children }: Props) {
   return (
     <ProposalContext.Provider
       value={{
-        open,
-        setOpen,
         currentProposal,
         setCurrentProposal,
         proposals,
@@ -108,7 +98,7 @@ export const useProposal = () => {
   const context = React.useContext(ProposalContext)
 
   if (!context) {
-    throw new Error('useProposal must be used within a ProposalProvider')
+    throw new Error('useProposal has to be used within <ProposalProvider>')
   }
 
   return context

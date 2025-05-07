@@ -24,7 +24,7 @@ export const generateProposalNumber = (nrcNumber: string): string => {
   return `FNI${year}${month}${day}${numericNrc}`
 }
 
-export const calculateBasePremium = (
+const calculateBasePremium = (
   declaredValue: number,
   coverageType: string
 ): number => {
@@ -50,7 +50,7 @@ export const calculateBasePremium = (
   return parseFloat((declaredValue * rate).toFixed(2))
 }
 
-export const calculateRiskLoad = (parcelDetails: ParcelDetails): number => {
+const calculateRiskLoad = (parcelDetails: ParcelDetails): number => {
   let riskFactor = 0
 
   // Add risk factors based on parcel attributes
@@ -75,7 +75,7 @@ export const calculateRiskLoad = (parcelDetails: ParcelDetails): number => {
   return parseFloat((parcelDetails.declaredValue * riskFactor).toFixed(2))
 }
 
-export const calculateTotalPremium = (
+const calculateTotalPremium = (
   basePremium: number,
   riskLoad: number,
   discountCode?: string

@@ -4,10 +4,6 @@ import { toast } from 'sonner'
 import { Form } from '@/components/ui/form'
 import { defineStepper } from '@/components/ui/stepper'
 import { updateDraftInStorage } from '@/features/drafts/utils/storage-utils'
-import {
-  saveProposalToLocalStorage,
-  generateProposalNumber,
-} from '@/features/proposal/utils'
 import { DocumentsConsentForm } from '@/features/proposal/components/documents-consent-form'
 import { ParcelDetailsForm } from '@/features/proposal/components/parcel-details-form'
 import { PolicyholderInfoForm } from '@/features/proposal/components/policy-holder-info-form'
@@ -26,6 +22,10 @@ import {
 } from '@/features/proposal/data/schema.ts'
 import { useDraftOperations } from '@/features/proposal/hooks/use-draft-operations'
 import { useProposalForm } from '@/features/proposal/hooks/use-proposal-form'
+import {
+  saveProposalToLocalStorage,
+  generateProposalNumber,
+} from '@/features/proposal/utils'
 import { getStepDescription } from '@/features/proposal/utils/stepper-utils'
 
 const { Stepper, useStepper } = defineStepper(

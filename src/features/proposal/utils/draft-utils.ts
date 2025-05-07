@@ -1,8 +1,11 @@
-import { saveDraftToStorage, updateDraftInStorage } from '@/features/drafts/utils'
-import { ProposalFormData } from '@/features/proposal/data/schema'
 import { Draft, DraftType } from '@/features/drafts/types'
+import {
+  saveDraftToStorage,
+  updateDraftInStorage,
+} from '@/features/drafts/utils'
+import { ProposalFormData } from '@/features/proposal/data/schema'
 
-export function proposalToDraft(
+function proposalToDraft(
   proposal: Partial<ProposalFormData>,
   currentStep: string
 ): Omit<Draft, 'id' | 'createdAt'> {

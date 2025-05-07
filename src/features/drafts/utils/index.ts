@@ -3,5 +3,4 @@ export {
   saveDraftToStorage,
   updateDraftInStorage,
   deleteDraftFromStorage,
-  getDraftById
-} from '@/features/drafts/utils/storage-utils';
+} from '@/features/drafts/utils/storage-utils'
