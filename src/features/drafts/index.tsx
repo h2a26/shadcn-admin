@@ -7,12 +7,8 @@ import { DraftViewDialog } from '@/features/drafts/components/draft-view-dialog.
 import { DraftsTable } from '@/features/drafts/components/drafts-table'
 import { DraftsProvider } from '@/features/drafts/context/drafts-context'
 
-export * from '@/features/drafts/types'
-export * from '@/features/drafts/utils/storage-utils'
-export {
-  DraftsProvider,
-  useDrafts,
-} from '@/features/drafts/context/drafts-context'
+// Export only the component
+export { DraftsProvider }
 
 export default function Drafts() {
   return (

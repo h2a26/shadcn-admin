@@ -1,6 +1,6 @@
-import { Draft, DraftType } from '@/features/drafts'
-import { saveDraftToStorage, updateDraftInStorage } from '@/features/drafts'
+import { saveDraftToStorage, updateDraftInStorage } from '@/features/drafts/utils'
 import { ProposalFormData } from '@/features/proposal/data/schema'
+import { Draft, DraftType } from '@/features/drafts/types'
 
 export function proposalToDraft(
   proposal: Partial<ProposalFormData>,

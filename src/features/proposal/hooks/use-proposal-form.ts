@@ -7,7 +7,7 @@ import {
   ProposalStepId,
 } from '@/features/proposal/data/schema.ts'
 
-export interface UseProposalFormReturn {
+interface UseProposalFormReturn {
   form: UseFormReturn<ProposalFormData>
   formDataRef: React.RefObject<Partial<ProposalFormData> | null>
   getCurrentFormData: () => Partial<ProposalFormData>

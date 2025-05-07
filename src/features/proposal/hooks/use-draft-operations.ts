@@ -1,7 +1,6 @@
 import React, { useState, useCallback } from 'react'
 import { UseFormReturn } from 'react-hook-form'
 import { toast } from 'sonner'
-import { useDrafts } from '@/features/drafts'
 import { getDraftById } from '@/features/drafts/utils/storage-utils'
 import {
   ProposalFormData,
@@ -12,8 +11,9 @@ import {
   draftToProposal,
 } from '@/features/proposal/utils/draft-utils'
 import { isValidStepId } from '@/features/proposal/utils/stepper-utils'
+import { useDrafts } from '@/features/drafts/context/drafts-context'
 
-export interface UseDraftOperationsReturn {
+interface UseDraftOperationsReturn {
   currentDraftId: string | null
   lastSaved: Date | null
   saveAsDraft: (currentStep: ProposalStepId) => Promise<string>

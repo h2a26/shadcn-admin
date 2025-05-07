@@ -1,6 +1,6 @@
 export type DraftStatus = 'draft' | 'submitted' | 'approved' | 'rejected'
 
-export interface DraftBase {
+interface DraftBase {
   id: string
   title: string
   createdAt: string
@@ -31,8 +31,8 @@ export interface DraftFilters {
   tags?: string[]
 }
 
-export type DraftSortField = 'createdAt' | 'updatedAt' | 'title'
-export type SortDirection = 'asc' | 'desc'
+type DraftSortField = 'createdAt' | 'updatedAt' | 'title'
+type SortDirection = 'asc' | 'desc'
 
 export interface DraftSortOptions {
   field: DraftSortField

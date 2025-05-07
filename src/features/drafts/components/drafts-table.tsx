@@ -26,13 +26,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { useDrafts } from '@/features/drafts'
 import {
   Draft,
   DraftStatus,
   DraftType,
   DraftSortField,
 } from '@/features/drafts/types'
+import { useDrafts } from '@/features/drafts/context/drafts-context.tsx'
 
 export function DraftsTable() {
   const {

@@ -7,7 +7,7 @@ import { updateDraftInStorage } from '@/features/drafts/utils/storage-utils'
 import {
   saveProposalToLocalStorage,
   generateProposalNumber,
-} from '@/features/proposal'
+} from '@/features/proposal/utils'
 import { DocumentsConsentForm } from '@/features/proposal/components/documents-consent-form'
 import { ParcelDetailsForm } from '@/features/proposal/components/parcel-details-form'
 import { PolicyholderInfoForm } from '@/features/proposal/components/policy-holder-info-form'

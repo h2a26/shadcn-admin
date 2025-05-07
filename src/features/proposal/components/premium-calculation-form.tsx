@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { Input } from '@/components/ui/input'
-import { calculatePremium } from '@/features/proposal'
+import { calculatePremium } from '@/features/proposal/utils'
 import {
   ParcelDetails,
   PremiumCalculation,

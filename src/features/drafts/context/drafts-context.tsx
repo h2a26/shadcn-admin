@@ -5,7 +5,7 @@ import {
   saveDraftToStorage,
   updateDraftInStorage,
   deleteDraftFromStorage,
-} from '@/features/drafts'
+} from '@/features/drafts/utils'
 import { Draft, DraftFilters, DraftSortOptions } from '@/features/drafts/types'
 
 type DraftsDialogType = 'create' | 'view' | 'edit' | 'delete'
@@ -116,14 +116,14 @@ export function DraftsProvider({ children }: DraftsProviderProps) {
   }
 
   return (
-    <DraftsContext.Provider value={contextValue}>
+    <DraftsContext value={contextValue}>
       {children}
-    </DraftsContext.Provider>
+    </DraftsContext>
   )
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function useDrafts() {
+export const useDrafts = () => {
   const draftsContext = useContext(DraftsContext)
 
   if (!draftsContext) {
