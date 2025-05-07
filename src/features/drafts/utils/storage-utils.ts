@@ -35,7 +35,7 @@ export function getDraftsFromStorage(): Draft[] {
   }
 
   const parsedData = safelyParseJSON(storedData)
-  
+
   if (!parsedData || !Array.isArray(parsedData)) {
     resetStorage()
     return []
@@ -44,52 +44,58 @@ export function getDraftsFromStorage(): Draft[] {
   return parsedData.filter(isValidDraft)
 }
 
-export function saveDraftToStorage(draft: Omit<Draft, 'id' | 'createdAt'>): string {
+export function saveDraftToStorage(
+  draft: Omit<Draft, 'id' | 'createdAt'>
+): string {
   try {
     const existingDrafts = getDraftsFromStorage()
-    
+
     const newDraft: Draft = {
       ...draft,
       id: `draft-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       createdAt: new Date().toISOString(),
     }
-    
+
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify([...existingDrafts, newDraft])
     )
-    
+
     return newDraft.id
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error'
     throw new Error(`Failed to save draft: ${errorMessage}`)
   }
 }
 
-export function updateDraftInStorage(id: string, updatedData: Partial<Draft>): boolean {
+export function updateDraftInStorage(
+  id: string,
+  updatedData: Partial<Draft>
+): boolean {
   if (!id) {
     return false
   }
-  
+
   try {
     const drafts = getDraftsFromStorage()
-    const draftIndex = drafts.findIndex(d => d.id === id)
-    
+    const draftIndex = drafts.findIndex((d) => d.id === id)
+
     if (draftIndex === -1) {
       return false
     }
-    
+
     const updatedDraft: Draft = {
       ...drafts[draftIndex],
       ...updatedData,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     }
-    
+
     const updatedDrafts = [...drafts]
     updatedDrafts[draftIndex] = updatedDraft
-    
+
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedDrafts))
-    
+
     return true
   } catch {
     return false
@@ -100,17 +106,17 @@ export function deleteDraftFromStorage(id: string): boolean {
   if (!id) {
     return false
   }
-  
+
   try {
     const drafts = getDraftsFromStorage()
-    const filteredDrafts = drafts.filter(d => d.id !== id)
-    
+    const filteredDrafts = drafts.filter((d) => d.id !== id)
+
     if (filteredDrafts.length === drafts.length) {
       return false
     }
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filteredDrafts))
-    
+
     return true
   } catch {
     return false
@@ -121,10 +127,10 @@ export function getDraftById(id: string): Draft | null {
   if (!id) {
     return null
   }
-  
+
   try {
     const drafts = getDraftsFromStorage()
-    const draft = drafts.find(d => d.id === id)
+    const draft = drafts.find((d) => d.id === id)
     return draft || null
   } catch {
     return null

@@ -1,43 +1,56 @@
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useFormContext } from 'react-hook-form';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
-import { CalendarIcon } from '@radix-ui/react-icons';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { format } from 'date-fns'
+import { useFormContext } from 'react-hook-form'
+import { CalendarIcon } from '@radix-ui/react-icons'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { CoverageType, RiderOption, ShippingCoverage } from '@/features/proposal/data/schema.ts'
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  CoverageType,
+  RiderOption,
+  ShippingCoverage,
+} from '@/features/proposal/data/schema.ts'
 
 export function ShippingCoverageForm() {
-  const {
-    control,
-    watch,
-  } = useFormContext<{ shippingCoverage: ShippingCoverage }>();
+  const { control, watch } = useFormContext<{
+    shippingCoverage: ShippingCoverage
+  }>()
 
   const coverageTypes: CoverageType[] = [
     'Basic',
     'Standard',
     'Premium',
     'Custom',
-  ];
+  ]
 
   const riderOptions: RiderOption[] = [
     'Water Damage',
     'Theft Protection',
     'Extended Coverage',
     'Express Claims',
-  ];
+  ]
 
-  const shippingDate = watch('shippingCoverage.shippingDate');
+  const shippingDate = watch('shippingCoverage.shippingDate')
 
   return (
     <div className='space-y-4 text-start'>
@@ -48,10 +61,7 @@ export function ShippingCoverageForm() {
           <FormItem>
             <FormLabel>Origin</FormLabel>
             <FormControl>
-              <Input
-                placeholder='Enter origin location'
-                {...field}
-              />
+              <Input placeholder='Enter origin location' {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -65,10 +75,7 @@ export function ShippingCoverageForm() {
           <FormItem>
             <FormLabel>Destination</FormLabel>
             <FormControl>
-              <Input
-                placeholder='Enter destination location'
-                {...field}
-              />
+              <Input placeholder='Enter destination location' {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -145,8 +152,7 @@ export function ShippingCoverageForm() {
                   selected={field.value}
                   onSelect={field.onChange}
                   disabled={(date) =>
-                    date < new Date() || 
-                    (shippingDate && date < shippingDate)
+                    date < new Date() || (shippingDate && date < shippingDate)
                   }
                 />
               </PopoverContent>
@@ -162,10 +168,7 @@ export function ShippingCoverageForm() {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Coverage Type</FormLabel>
-            <Select
-              onValueChange={field.onChange}
-              defaultValue={field.value}
-            >
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder='Select coverage type' />
@@ -220,14 +223,14 @@ export function ShippingCoverageForm() {
                       onCheckedChange={(checked) => {
                         const updatedRiders = checked
                           ? [...(field.value || []), rider]
-                          : (field.value || []).filter((r) => r !== rider);
-                        field.onChange(updatedRiders);
+                          : (field.value || []).filter((r) => r !== rider)
+                        field.onChange(updatedRiders)
                       }}
                     />
                   </FormControl>
                   <label
                     htmlFor={`rider-${rider}`}
-                    className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+                    className='text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
                   >
                     {rider}
                   </label>
@@ -239,5 +242,5 @@ export function ShippingCoverageForm() {
         )}
       />
     </div>
-  );
+  )
 }

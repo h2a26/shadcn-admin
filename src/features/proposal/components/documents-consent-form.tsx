@@ -1,31 +1,32 @@
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Controller, useFormContext } from 'react-hook-form';
-import { useState } from 'react';
-import { Input } from '@/components/ui/input';
+import { useState } from 'react'
+import { Controller, useFormContext } from 'react-hook-form'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
 import { DocumentsConsent } from '@/features/proposal/data/schema'
 
 export function DocumentsConsentForm() {
   const {
     control,
     formState: { errors },
-  } = useFormContext<{ documentsConsent: DocumentsConsent }>();
+  } = useFormContext<{ documentsConsent: DocumentsConsent }>()
 
-  const [identityDocName, setIdentityDocName] = useState<string>('');
-  const [ownershipProofName, setOwnershipProofName] = useState<string>('');
-  const [invoiceName, setInvoiceName] = useState<string>('');
+  const [identityDocName, setIdentityDocName] = useState<string>('')
+  const [ownershipProofName, setOwnershipProofName] = useState<string>('')
+  const [invoiceName, setInvoiceName] = useState<string>('')
 
   return (
     <div className='space-y-6 text-start'>
       <div className='space-y-4'>
         <h3 className='text-lg font-medium'>Required Documents</h3>
-        <p className='text-sm text-muted-foreground'>
-          Please upload the following required documents to complete your proposal.
+        <p className='text-muted-foreground text-sm'>
+          Please upload the following required documents to complete your
+          proposal.
         </p>
 
         <div className='space-y-4'>
           <div className='space-y-2'>
-            <label className='block text-sm font-medium text-primary'>
+            <label className='text-primary block text-sm font-medium'>
               Identity Document
             </label>
             <div className='flex items-center gap-2'>
@@ -41,17 +42,19 @@ export function DocumentsConsentForm() {
                       type='file'
                       className='hidden'
                       onChange={(e) => {
-                        const file = e.target.files?.[0];
+                        const file = e.target.files?.[0]
                         if (file) {
-                          onChange(file);
-                          setIdentityDocName(file.name);
+                          onChange(file)
+                          setIdentityDocName(file.name)
                         }
                       }}
                     />
                     <Button
                       type='button'
                       variant='outline'
-                      onClick={() => document.getElementById('identityDoc')?.click()}
+                      onClick={() =>
+                        document.getElementById('identityDoc')?.click()
+                      }
                     >
                       Choose File
                     </Button>
@@ -63,17 +66,18 @@ export function DocumentsConsentForm() {
               />
             </div>
             {errors.documentsConsent?.identityDoc?.message === 'string' && (
-              <span className='text-sm text-destructive'>
+              <span className='text-destructive text-sm'>
                 {errors.documentsConsent.identityDoc.message}
               </span>
             )}
-            <p className='text-xs text-muted-foreground'>
-              Upload a valid government-issued ID (passport, driver's license, etc.)
+            <p className='text-muted-foreground text-xs'>
+              Upload a valid government-issued ID (passport, driver's license,
+              etc.)
             </p>
           </div>
 
           <div className='space-y-2'>
-            <label className='block text-sm font-medium text-primary'>
+            <label className='text-primary block text-sm font-medium'>
               Ownership Proof
             </label>
             <div className='flex items-center gap-2'>
@@ -89,17 +93,19 @@ export function DocumentsConsentForm() {
                       type='file'
                       className='hidden'
                       onChange={(e) => {
-                        const file = e.target.files?.[0];
+                        const file = e.target.files?.[0]
                         if (file) {
-                          onChange(file);
-                          setOwnershipProofName(file.name);
+                          onChange(file)
+                          setOwnershipProofName(file.name)
                         }
                       }}
                     />
                     <Button
                       type='button'
                       variant='outline'
-                      onClick={() => document.getElementById('ownershipProof')?.click()}
+                      onClick={() =>
+                        document.getElementById('ownershipProof')?.click()
+                      }
                     >
                       Choose File
                     </Button>
@@ -111,17 +117,18 @@ export function DocumentsConsentForm() {
               />
             </div>
             {errors.documentsConsent?.ownershipProof?.message === 'string' && (
-              <span className='text-sm text-destructive'>
+              <span className='text-destructive text-sm'>
                 {errors.documentsConsent.ownershipProof.message}
               </span>
             )}
-            <p className='text-xs text-muted-foreground'>
-              Upload proof of ownership for the parcel contents (receipt, certificate, etc.)
+            <p className='text-muted-foreground text-xs'>
+              Upload proof of ownership for the parcel contents (receipt,
+              certificate, etc.)
             </p>
           </div>
 
           <div className='space-y-2'>
-            <label className='block text-sm font-medium text-primary'>
+            <label className='text-primary block text-sm font-medium'>
               Invoice (Optional)
             </label>
             <div className='flex items-center gap-2'>
@@ -137,17 +144,19 @@ export function DocumentsConsentForm() {
                       type='file'
                       className='hidden'
                       onChange={(e) => {
-                        const file = e.target.files?.[0];
+                        const file = e.target.files?.[0]
                         if (file) {
-                          onChange(file);
-                          setInvoiceName(file.name);
+                          onChange(file)
+                          setInvoiceName(file.name)
                         }
                       }}
                     />
                     <Button
                       type='button'
                       variant='outline'
-                      onClick={() => document.getElementById('invoice')?.click()}
+                      onClick={() =>
+                        document.getElementById('invoice')?.click()
+                      }
                     >
                       Choose File
                     </Button>
@@ -158,7 +167,7 @@ export function DocumentsConsentForm() {
                 )}
               />
             </div>
-            <p className='text-xs text-muted-foreground'>
+            <p className='text-muted-foreground text-xs'>
               Upload an invoice or receipt if available
             </p>
           </div>
@@ -184,16 +193,17 @@ export function DocumentsConsentForm() {
             <div className='space-y-1'>
               <label
                 htmlFor='agreeTerms'
-                className='text-sm font-medium leading-none'
+                className='text-sm leading-none font-medium'
               >
                 I agree to the terms and conditions
               </label>
-              <p className='text-xs text-muted-foreground'>
-                By checking this box, you agree to the insurance policy terms, coverage limits, 
-                exclusions, and claims process as outlined in our terms and conditions.
+              <p className='text-muted-foreground text-xs'>
+                By checking this box, you agree to the insurance policy terms,
+                coverage limits, exclusions, and claims process as outlined in
+                our terms and conditions.
               </p>
               {errors.documentsConsent?.agreeTerms && (
-                <span className='text-sm text-destructive'>
+                <span className='text-destructive text-sm'>
                   {errors.documentsConsent.agreeTerms.message}
                 </span>
               )}
@@ -216,16 +226,17 @@ export function DocumentsConsentForm() {
             <div className='space-y-1'>
               <label
                 htmlFor='confirmAccuracy'
-                className='text-sm font-medium leading-none'
+                className='text-sm leading-none font-medium'
               >
                 I confirm the accuracy of the information provided
               </label>
-              <p className='text-xs text-muted-foreground'>
-                I confirm that all information provided in this proposal is accurate and complete. 
-                I understand that providing false information may result in claim denial or policy cancellation.
+              <p className='text-muted-foreground text-xs'>
+                I confirm that all information provided in this proposal is
+                accurate and complete. I understand that providing false
+                information may result in claim denial or policy cancellation.
               </p>
               {errors.documentsConsent?.confirmAccuracy && (
-                <span className='text-sm text-destructive'>
+                <span className='text-destructive text-sm'>
                   {errors.documentsConsent.confirmAccuracy.message}
                 </span>
               )}
@@ -234,5 +245,5 @@ export function DocumentsConsentForm() {
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -21,7 +21,6 @@ import {
   IconUsers,
   IconFileSymlink,
 } from '@tabler/icons-react'
-
 import { AudioWaveform, Command, GalleryVerticalEnd } from 'lucide-react'
 import { type SidebarData } from '../types'
 

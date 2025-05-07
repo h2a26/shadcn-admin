@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import useDialogState from '@/hooks/use-dialog-state'
+import { ProposalFormData } from '@/features/proposal/data/schema.ts'
 import {
   getProposalsFromLocalStorage,
   saveProposalToLocalStorage,
   updateProposalInLocalStorage,
-  deleteProposalFromLocalStorage
+  deleteProposalFromLocalStorage,
 } from '@/features/proposal/utils/proposal-utils'
-import { ProposalFormData } from '@/features/proposal/data/schema.ts'
 
 type ProposalDialogType = 'create' | 'view' | 'edit' | 'delete'
 
@@ -20,12 +20,14 @@ interface StoredProposal extends ProposalFormData {
 interface ProposalContextType {
   open: ProposalDialogType | null
   setOpen: (type: ProposalDialogType | null) => void
-  
+
   currentProposal: StoredProposal | null
-  setCurrentProposal: React.Dispatch<React.SetStateAction<StoredProposal | null>>
-  
+  setCurrentProposal: React.Dispatch<
+    React.SetStateAction<StoredProposal | null>
+  >
+
   proposals: StoredProposal[]
-  
+
   refreshProposals: () => void
   saveProposal: (proposal: ProposalFormData) => string
   updateProposal: (id: string, proposal: Partial<ProposalFormData>) => boolean
@@ -40,9 +42,11 @@ interface Props {
 
 export function ProposalProvider({ children }: Props) {
   const [open, setOpen] = useDialogState<ProposalDialogType>(null)
-  
-  const [currentProposal, setCurrentProposal] = useState<StoredProposal | null>(null)
-  
+
+  const [currentProposal, setCurrentProposal] = useState<StoredProposal | null>(
+    null
+  )
+
   const [proposals, setProposals] = useState<StoredProposal[]>([])
 
   const refreshProposals = useCallback(() => {
@@ -61,7 +65,10 @@ export function ProposalProvider({ children }: Props) {
     return id
   }
 
-  const updateProposal = (id: string, proposal: Partial<ProposalFormData>): boolean => {
+  const updateProposal = (
+    id: string,
+    proposal: Partial<ProposalFormData>
+  ): boolean => {
     const success = updateProposalInLocalStorage(id, proposal)
     if (success) {
       refreshProposals()
@@ -88,7 +95,7 @@ export function ProposalProvider({ children }: Props) {
         refreshProposals,
         saveProposal,
         updateProposal,
-        deleteProposal
+        deleteProposal,
       }}
     >
       {children}

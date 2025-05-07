@@ -1,19 +1,23 @@
-import { useForm, UseFormReturn } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import React, { useCallback, useRef } from 'react';
-import { ProposalFormData, proposalFormSchema, ProposalStepId } from '@/features/proposal/data/schema.ts'
+import React, { useCallback, useRef } from 'react'
+import { useForm, UseFormReturn } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import {
+  ProposalFormData,
+  proposalFormSchema,
+  ProposalStepId,
+} from '@/features/proposal/data/schema.ts'
 
 export interface UseProposalFormReturn {
-  form: UseFormReturn<ProposalFormData>;
-  formDataRef: React.RefObject<Partial<ProposalFormData> | null>;
-  getCurrentFormData: () => Partial<ProposalFormData>;
-  hasFormData: () => boolean;
-  validateStep: (stepId: ProposalStepId) => Promise<boolean>;
+  form: UseFormReturn<ProposalFormData>
+  formDataRef: React.RefObject<Partial<ProposalFormData> | null>
+  getCurrentFormData: () => Partial<ProposalFormData>
+  hasFormData: () => boolean
+  validateStep: (stepId: ProposalStepId) => Promise<boolean>
 }
 
 export function useProposalForm(): UseProposalFormReturn {
-  const formDataRef = useRef<Partial<ProposalFormData> | null>(null);
-  
+  const formDataRef = useRef<Partial<ProposalFormData> | null>(null)
+
   const form = useForm<ProposalFormData>({
     mode: 'onChange',
     resolver: zodResolver(proposalFormSchema) as never,
@@ -61,36 +65,38 @@ export function useProposalForm(): UseProposalFormReturn {
         confirmAccuracy: false,
       },
     },
-  });
+  })
 
   const getCurrentFormData = useCallback((): Partial<ProposalFormData> => {
-    const values = form.getValues();
-    formDataRef.current = values;
-    return values;
-  }, [form]);
+    const values = form.getValues()
+    formDataRef.current = values
+    return values
+  }, [form])
 
   const hasFormData = useCallback((): boolean => {
-    const formData = getCurrentFormData();
-    
-    const hasPolicyholderInfo = formData.policyholderInfo && Object.values(formData.policyholderInfo).some(
-      value => typeof value === 'string' && value.trim() !== ''
-    );
-    
-    const hasParcelDetails = formData.parcelDetails && Object.entries(formData.parcelDetails).some(
-      ([_, value]) => {
-        if (typeof value === 'string') return value.trim() !== '';
-        if (typeof value === 'number') return value > 0;
-        if (typeof value === 'boolean') return value;
-        return false;
-      }
-    );
-    
-    return Boolean(hasPolicyholderInfo || hasParcelDetails);
-  }, [getCurrentFormData]);
+    const formData = getCurrentFormData()
+
+    const hasPolicyholderInfo =
+      formData.policyholderInfo &&
+      Object.values(formData.policyholderInfo).some(
+        (value) => typeof value === 'string' && value.trim() !== ''
+      )
+
+    const hasParcelDetails =
+      formData.parcelDetails &&
+      Object.entries(formData.parcelDetails).some(([_, value]) => {
+        if (typeof value === 'string') return value.trim() !== ''
+        if (typeof value === 'number') return value > 0
+        if (typeof value === 'boolean') return value
+        return false
+      })
+
+    return Boolean(hasPolicyholderInfo || hasParcelDetails)
+  }, [getCurrentFormData])
 
   const validateStep = async (stepId: ProposalStepId): Promise<boolean> => {
-    return form.trigger(stepId);
-  };
+    return form.trigger(stepId)
+  }
 
   return {
     form,
@@ -98,5 +104,5 @@ export function useProposalForm(): UseProposalFormReturn {
     getCurrentFormData,
     hasFormData,
     validateStep,
-  };
+  }
 }

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
 export const policyholderInfoSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
@@ -6,17 +6,13 @@ export const policyholderInfoSchema = z.object({
     .string()
     .min(1, 'Phone number is required')
     .regex(/^[0-9+\s-]+$/, 'Invalid phone number format'),
-  email: z
-    .string()
-    .email('Invalid email format')
-    .optional()
-    .or(z.literal('')),
+  email: z.string().email('Invalid email format').optional().or(z.literal('')),
   nrcNumber: z
     .string()
     .min(1, 'NRC number is required')
     .regex(/^[0-9/()]+$/, 'Invalid NRC number format'),
   address: z.string().optional().or(z.literal('')),
-});
+})
 
 export const parcelDetailsSchema = z.object({
   description: z.string().min(1, 'Description is required'),
@@ -29,22 +25,46 @@ export const parcelDetailsSchema = z.object({
   weightKg: z
     .number()
     .optional()
-    .or(z.string().regex(/^\d*\.?\d*$/).transform(Number).optional()),
+    .or(
+      z
+        .string()
+        .regex(/^\d*\.?\d*$/)
+        .transform(Number)
+        .optional()
+    ),
   lengthCm: z
     .number()
     .optional()
-    .or(z.string().regex(/^\d*\.?\d*$/).transform(Number).optional()),
+    .or(
+      z
+        .string()
+        .regex(/^\d*\.?\d*$/)
+        .transform(Number)
+        .optional()
+    ),
   widthCm: z
     .number()
     .optional()
-    .or(z.string().regex(/^\d*\.?\d*$/).transform(Number).optional()),
+    .or(
+      z
+        .string()
+        .regex(/^\d*\.?\d*$/)
+        .transform(Number)
+        .optional()
+    ),
   heightCm: z
     .number()
     .optional()
-    .or(z.string().regex(/^\d*\.?\d*$/).transform(Number).optional()),
+    .or(
+      z
+        .string()
+        .regex(/^\d*\.?\d*$/)
+        .transform(Number)
+        .optional()
+    ),
   fragileItem: z.boolean().default(false),
   highRiskItem: z.boolean().default(false),
-});
+})
 
 export const shippingCoverageSchema = z.object({
   origin: z.string().min(1, 'Origin is required'),
@@ -61,9 +81,15 @@ export const shippingCoverageSchema = z.object({
   deductible: z
     .number()
     .optional()
-    .or(z.string().regex(/^\d*\.?\d*$/).transform(Number).optional()),
+    .or(
+      z
+        .string()
+        .regex(/^\d*\.?\d*$/)
+        .transform(Number)
+        .optional()
+    ),
   riders: z.array(z.string()).optional(),
-});
+})
 
 export const premiumCalculationSchema = z.object({
   proposalNo: z.string().min(1, 'Proposal number is required'),
@@ -71,15 +97,17 @@ export const premiumCalculationSchema = z.object({
   riskLoad: z.number(),
   totalPremium: z.number(),
   discountCode: z.string().optional().or(z.literal('')),
-});
+})
 
 export const documentsConsentSchema = z.object({
   identityDoc: z.any().optional().nullable(),
   ownershipProof: z.any().optional().nullable(),
   invoice: z.any().optional().nullable(),
   agreeTerms: z.boolean().refine((val) => val, 'You must agree to the terms'),
-  confirmAccuracy: z.boolean().refine((val) => val, 'You must confirm accuracy'),
-});
+  confirmAccuracy: z
+    .boolean()
+    .refine((val) => val, 'You must confirm accuracy'),
+})
 
 export const proposalFormSchema = z.object({
   policyholderInfo: policyholderInfoSchema,
@@ -87,17 +115,31 @@ export const proposalFormSchema = z.object({
   shippingCoverage: shippingCoverageSchema,
   premiumCalculation: premiumCalculationSchema,
   documentsConsent: documentsConsentSchema,
-});
+})
 
-export type PolicyholderInfo = z.infer<typeof policyholderInfoSchema>;
-export type ParcelDetails = z.infer<typeof parcelDetailsSchema>;
-export type ShippingCoverage = z.infer<typeof shippingCoverageSchema>;
-export type PremiumCalculation = z.infer<typeof premiumCalculationSchema>;
-export type DocumentsConsent = z.infer<typeof documentsConsentSchema>;
-export type ProposalFormData = z.infer<typeof proposalFormSchema>;
+export type PolicyholderInfo = z.infer<typeof policyholderInfoSchema>
+export type ParcelDetails = z.infer<typeof parcelDetailsSchema>
+export type ShippingCoverage = z.infer<typeof shippingCoverageSchema>
+export type PremiumCalculation = z.infer<typeof premiumCalculationSchema>
+export type DocumentsConsent = z.infer<typeof documentsConsentSchema>
+export type ProposalFormData = z.infer<typeof proposalFormSchema>
 
-
-export type CoverageType = 'Basic' | 'Standard' | 'Premium' | 'Custom';
-export type ParcelCategory = 'Electronics' | 'Documents' | 'Clothing' | 'Fragile' | 'Perishable' | 'Other';
-export type RiderOption = 'Water Damage' | 'Theft Protection' | 'Extended Coverage' | 'Express Claims';
-export type ProposalStepId = 'policyholderInfo' | 'parcelDetails' | 'shippingCoverage' | 'premiumCalculation' | 'documentsConsent';
+export type CoverageType = 'Basic' | 'Standard' | 'Premium' | 'Custom'
+export type ParcelCategory =
+  | 'Electronics'
+  | 'Documents'
+  | 'Clothing'
+  | 'Fragile'
+  | 'Perishable'
+  | 'Other'
+export type RiderOption =
+  | 'Water Damage'
+  | 'Theft Protection'
+  | 'Extended Coverage'
+  | 'Express Claims'
+export type ProposalStepId =
+  | 'policyholderInfo'
+  | 'parcelDetails'
+  | 'shippingCoverage'
+  | 'premiumCalculation'
+  | 'documentsConsent'

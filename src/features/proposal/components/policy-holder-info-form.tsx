@@ -1,20 +1,20 @@
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { PolicyholderInfo } from '@/features/proposal/data/schema'
 
 export function PolicyholderInfoForm() {
   const {
     register,
     formState: { errors },
-  } = useFormContext<{ policyholderInfo: PolicyholderInfo }>();
+  } = useFormContext<{ policyholderInfo: PolicyholderInfo }>()
 
   return (
     <div className='space-y-4 text-start'>
       <div className='space-y-2'>
         <label
           htmlFor={register('policyholderInfo.fullName').name}
-          className='block text-sm font-medium text-primary'
+          className='text-primary block text-sm font-medium'
         >
           Full Name
         </label>
@@ -25,7 +25,7 @@ export function PolicyholderInfoForm() {
           placeholder='Enter full name'
         />
         {errors.policyholderInfo?.fullName && (
-          <span className='text-sm text-destructive'>
+          <span className='text-destructive text-sm'>
             {errors.policyholderInfo.fullName.message}
           </span>
         )}
@@ -34,7 +34,7 @@ export function PolicyholderInfoForm() {
       <div className='space-y-2'>
         <label
           htmlFor={register('policyholderInfo.phoneNumber').name}
-          className='block text-sm font-medium text-primary'
+          className='text-primary block text-sm font-medium'
         >
           Phone Number
         </label>
@@ -45,7 +45,7 @@ export function PolicyholderInfoForm() {
           placeholder='Enter phone number'
         />
         {errors.policyholderInfo?.phoneNumber && (
-          <span className='text-sm text-destructive'>
+          <span className='text-destructive text-sm'>
             {errors.policyholderInfo.phoneNumber.message}
           </span>
         )}
@@ -54,7 +54,7 @@ export function PolicyholderInfoForm() {
       <div className='space-y-2'>
         <label
           htmlFor={register('policyholderInfo.email').name}
-          className='block text-sm font-medium text-primary'
+          className='text-primary block text-sm font-medium'
         >
           Email (Optional)
         </label>
@@ -66,7 +66,7 @@ export function PolicyholderInfoForm() {
           type='email'
         />
         {errors.policyholderInfo?.email && (
-          <span className='text-sm text-destructive'>
+          <span className='text-destructive text-sm'>
             {errors.policyholderInfo.email.message}
           </span>
         )}
@@ -75,7 +75,7 @@ export function PolicyholderInfoForm() {
       <div className='space-y-2'>
         <label
           htmlFor={register('policyholderInfo.nrcNumber').name}
-          className='block text-sm font-medium text-primary'
+          className='text-primary block text-sm font-medium'
         >
           NRC Number
         </label>
@@ -86,7 +86,7 @@ export function PolicyholderInfoForm() {
           placeholder='Enter NRC number'
         />
         {errors.policyholderInfo?.nrcNumber && (
-          <span className='text-sm text-destructive'>
+          <span className='text-destructive text-sm'>
             {errors.policyholderInfo.nrcNumber.message}
           </span>
         )}
@@ -95,7 +95,7 @@ export function PolicyholderInfoForm() {
       <div className='space-y-2'>
         <label
           htmlFor={register('policyholderInfo.address').name}
-          className='block text-sm font-medium text-primary'
+          className='text-primary block text-sm font-medium'
         >
           Address (Optional)
         </label>
@@ -107,11 +107,11 @@ export function PolicyholderInfoForm() {
           rows={3}
         />
         {errors.policyholderInfo?.address && (
-          <span className='text-sm text-destructive'>
+          <span className='text-destructive text-sm'>
             {errors.policyholderInfo.address.message}
           </span>
         )}
       </div>
     </div>
-  );
+  )
 }

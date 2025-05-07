@@ -1,8 +1,14 @@
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import { ParcelCategory, ParcelDetails } from '@/features/proposal/data/schema'
 
 export function ParcelDetailsForm() {
@@ -10,7 +16,7 @@ export function ParcelDetailsForm() {
     register,
     control,
     formState: { errors },
-  } = useFormContext<{ parcelDetails: ParcelDetails }>();
+  } = useFormContext<{ parcelDetails: ParcelDetails }>()
 
   const parcelCategories: ParcelCategory[] = [
     'Electronics',
@@ -19,14 +25,14 @@ export function ParcelDetailsForm() {
     'Fragile',
     'Perishable',
     'Other',
-  ];
+  ]
 
   return (
     <div className='space-y-4 text-start'>
       <div className='space-y-2'>
         <label
           htmlFor={register('parcelDetails.description').name}
-          className='block text-sm font-medium text-primary'
+          className='text-primary block text-sm font-medium'
         >
           Description
         </label>
@@ -38,7 +44,7 @@ export function ParcelDetailsForm() {
           rows={3}
         />
         {errors.parcelDetails?.description && (
-          <span className='text-sm text-destructive'>
+          <span className='text-destructive text-sm'>
             {errors.parcelDetails.description.message}
           </span>
         )}
@@ -47,7 +53,7 @@ export function ParcelDetailsForm() {
       <div className='space-y-2'>
         <label
           htmlFor='parcelDetails.category'
-          className='block text-sm font-medium text-primary'
+          className='text-primary block text-sm font-medium'
         >
           Category
         </label>
@@ -55,10 +61,7 @@ export function ParcelDetailsForm() {
           name='parcelDetails.category'
           control={control}
           render={({ field }) => (
-            <Select
-              onValueChange={field.onChange}
-              defaultValue={field.value}
-            >
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
               <SelectTrigger id='parcelDetails.category' className='w-full'>
                 <SelectValue placeholder='Select category' />
               </SelectTrigger>
@@ -73,7 +76,7 @@ export function ParcelDetailsForm() {
           )}
         />
         {errors.parcelDetails?.category && (
-          <span className='text-sm text-destructive'>
+          <span className='text-destructive text-sm'>
             {errors.parcelDetails.category.message}
           </span>
         )}
@@ -82,7 +85,7 @@ export function ParcelDetailsForm() {
       <div className='space-y-2'>
         <label
           htmlFor={register('parcelDetails.declaredValue').name}
-          className='block text-sm font-medium text-primary'
+          className='text-primary block text-sm font-medium'
         >
           Declared Value
         </label>
@@ -96,17 +99,17 @@ export function ParcelDetailsForm() {
           step='0.01'
         />
         {errors.parcelDetails?.declaredValue && (
-          <span className='text-sm text-destructive'>
+          <span className='text-destructive text-sm'>
             {errors.parcelDetails.declaredValue.message}
           </span>
         )}
       </div>
 
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+      <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
         <div className='space-y-2'>
           <label
             htmlFor={register('parcelDetails.weightKg').name}
-            className='block text-sm font-medium text-primary'
+            className='text-primary block text-sm font-medium'
           >
             Weight (kg)
           </label>
@@ -119,7 +122,7 @@ export function ParcelDetailsForm() {
             step='0.01'
           />
           {errors.parcelDetails?.weightKg && (
-            <span className='text-sm text-destructive'>
+            <span className='text-destructive text-sm'>
               {errors.parcelDetails.weightKg.message}
             </span>
           )}
@@ -128,7 +131,7 @@ export function ParcelDetailsForm() {
         <div className='space-y-2'>
           <label
             htmlFor={register('parcelDetails.lengthCm').name}
-            className='block text-sm font-medium text-primary'
+            className='text-primary block text-sm font-medium'
           >
             Length (cm)
           </label>
@@ -145,7 +148,7 @@ export function ParcelDetailsForm() {
         <div className='space-y-2'>
           <label
             htmlFor={register('parcelDetails.widthCm').name}
-            className='block text-sm font-medium text-primary'
+            className='text-primary block text-sm font-medium'
           >
             Width (cm)
           </label>
@@ -163,7 +166,7 @@ export function ParcelDetailsForm() {
       <div className='space-y-2'>
         <label
           htmlFor={register('parcelDetails.heightCm').name}
-          className='block text-sm font-medium text-primary'
+          className='text-primary block text-sm font-medium'
         >
           Height (cm)
         </label>
@@ -191,7 +194,7 @@ export function ParcelDetailsForm() {
         />
         <label
           htmlFor='parcelDetails.fragileItem'
-          className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+          className='text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
         >
           Fragile Item
         </label>
@@ -211,11 +214,11 @@ export function ParcelDetailsForm() {
         />
         <label
           htmlFor='parcelDetails.highRiskItem'
-          className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+          className='text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
         >
           High Risk Item
         </label>
       </div>
     </div>
-  );
+  )
 }
