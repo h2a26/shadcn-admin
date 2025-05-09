@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useWorkflow } from '@/features/workflow/hooks/use-workflow.ts'
+import { useWorkflow } from '@/features/workflow/context/workflow-context'
 import { WorkflowTask, WorkflowStep } from '../data/schema'
 import {
   transitionTask,

@@ -7,7 +7,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { User } from '@/features/users/data/schema'
-import { useWorkflow } from '@/features/workflow/hooks/use-workflow.ts'
+import { useWorkflow } from '@/features/workflow/context/workflow-context.tsx'
 import { getAvailableAssignees } from '../utils/engine'
 
 interface AssigneeSelectorProps {

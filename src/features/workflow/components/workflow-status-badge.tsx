@@ -13,7 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { useWorkflow } from '@/features/workflow/hooks/use-workflow.ts'
+import { useWorkflow } from '@/features/workflow/context/workflow-context'
 
 interface WorkflowStatusBadgeProps {
   workflowTaskId?: string

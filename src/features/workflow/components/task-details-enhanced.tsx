@@ -23,8 +23,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { PermissionGuard } from '@/features/users/components/permission-guard.tsx'
 import { useUsers } from '@/features/users/context/users-context'
-import { useWorkflow } from '@/features/workflow/hooks/use-workflow.ts'
-import { WorkflowTask } from '../data/schema'
+import { useWorkflow } from '../context/workflow-context'
 import { StepTransition } from './step-transition'
 import { TaskHistory } from './task-history'
 
@@ -37,47 +36,22 @@ export function TaskDetailsEnhanced({
   taskId,
   onBack,
 }: TaskDetailsEnhancedProps) {
-  const { getTaskById, config, completeWorkflowTask } = useWorkflow()
+  const { getTaskById, config, completeTask } = useWorkflow()
   const { currentUser, users } = useUsers()
   const [showTransition, setShowTransition] = useState(false)
   const [isCompleting, setIsCompleting] = useState(false)
 
-  // Explicitly typed as WorkflowTask to show the import is being used
-  const task: WorkflowTask | null = getTaskById(taskId)
+  const task = getTaskById(taskId)
+  const currentStep = task?.currentStep
+  const stepConfig =
+    config && currentStep
+      ? config.steps.find((s) => s.name === currentStep)
+      : undefined
 
-  // If task not found, show error
   if (!task) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Task Details</CardTitle>
-          <CardDescription>Error: Task not found</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className='flex items-center justify-center py-6'>
-            <p className='text-destructive text-sm'>
-              The workflow task (ID: {taskId}) could not be found
-            </p>
-          </div>
-        </CardContent>
-        {onBack && (
-          <CardFooter>
-            <Button variant='outline' onClick={onBack}>
-              <ArrowLeft className='mr-2 h-4 w-4' />
-              Back
-            </Button>
-          </CardFooter>
-        )}
-      </Card>
-    )
+    return <div className='text-red-500'>Task not found</div>
   }
 
-  // Get step configuration
-  const stepConfig = config?.steps.find(
-    (s) => s.name.toLowerCase() === task.currentStep
-  )
-
-  // Determine badge variant based on status
   const getStatusBadgeVariant = ():
     | 'default'
     | 'secondary'
@@ -99,7 +73,6 @@ export function TaskDetailsEnhanced({
     }
   }
 
-  // Handle complete task
   const handleCompleteTask = async () => {
     if (!currentUser) return
 
@@ -107,7 +80,7 @@ export function TaskDetailsEnhanced({
       setIsCompleting(true)
 
       // Complete the task
-      completeWorkflowTask(task.id, currentUser.id, 'Task completed')
+      completeTask(task, task.assignedBy)
 
       // Hide transition form if it's open
       setShowTransition(false)

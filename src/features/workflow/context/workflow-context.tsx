@@ -1,17 +1,13 @@
-import React, { useState, useCallback, useEffect } from 'react'
-import {
-  isWorkflowDialogType,
-  isWorkflowTask,
-} from '@/features/workflow/utils/workflow-context-utils.ts'
+import React, { useEffect, useState, useCallback } from 'react'
 import { getWorkflowConfig } from '../data/config'
 import {
-  WorkflowConfig,
   WorkflowTask,
-  WorkflowTaskStatus,
+  WorkflowConfig,
+  StepConfig,
+  WorkflowHistoryEntry,
   workflowTaskSchema,
   WorkflowStep,
 } from '../data/schema'
-import { WorkflowContextType, WorkflowDialogType } from '../data/types'
 import {
   getStepConfig,
   createHistoryEntry,
@@ -23,9 +19,64 @@ import {
 import {
   getWorkflowTasksFromStorage,
   saveWorkflowTaskToStorage,
+  deleteWorkflowTaskFromStorage,
   generateWorkflowTaskId,
 } from '../utils/storage-utils'
-import { WorkflowContext } from './workflow-context-instance'
+
+interface WorkflowContextType {
+  currentTask: WorkflowTask | null
+  setCurrentTask: (task: WorkflowTask | null) => void
+  tasks: WorkflowTask[]
+  config: WorkflowConfig | null
+  refreshTasks: () => void
+  createTask: (
+    proposalId: string,
+    step: WorkflowStep,
+    assignedTo: string,
+    assignedBy: string,
+    comments?: string
+  ) => WorkflowTask
+  updateTask: (task: WorkflowTask) => void
+  deleteTask: (taskId: string) => void
+  getStepConfig: (
+    config: WorkflowConfig,
+    stepName: string
+  ) => StepConfig | undefined
+  createHistoryEntry: (
+    step: string,
+    assignedTo: string,
+    assignedBy: string,
+    comments?: string
+  ) => WorkflowHistoryEntry
+  transitionTask: (
+    task: WorkflowTask,
+    stepId: WorkflowStep,
+    assignedTo: string,
+    assignedBy: string,
+    comments?: string
+  ) => WorkflowTask
+  reassignTask: (
+    task: WorkflowTask,
+    userId: string,
+    assignedBy: string,
+    comments?: string
+  ) => WorkflowTask
+  sendBackTask: (
+    task: WorkflowTask,
+    stepId: WorkflowStep,
+    assignedTo: string,
+    assignedBy: string,
+    comments?: string
+  ) => WorkflowTask
+  completeTask: (
+    task: WorkflowTask,
+    assignedBy: string,
+    comments?: string
+  ) => WorkflowTask
+  getTaskById: (id: string) => WorkflowTask | undefined
+}
+
+const WorkflowContext = React.createContext<WorkflowContextType | null>(null)
 
 interface Props {
   children: React.ReactNode
@@ -36,17 +87,12 @@ export function WorkflowProvider({
   children,
   product = 'ParcelInsurance',
 }: Props) {
-  const [open, setOpen] = useState<WorkflowDialogType>(null)
-  const [currentTask, setCurrentTask] = useState<WorkflowTask | null>(null)
   const [tasks, setTasks] = useState<WorkflowTask[]>([])
   const [config, setConfig] = useState<WorkflowConfig | null>(null)
 
-  useEffect(() => {
-    const workflowConfig = getWorkflowConfig(product)
-    setConfig(workflowConfig)
-
-    const storedTasks = getWorkflowTasksFromStorage() || []
-    const validatedTasks = storedTasks.filter((task) => {
+  const refreshTasks = useCallback(() => {
+    const storedTasks = getWorkflowTasksFromStorage()
+    const validatedTasks = storedTasks.filter((task): task is WorkflowTask => {
       try {
         workflowTaskSchema.parse(task)
         return true
@@ -55,182 +101,137 @@ export function WorkflowProvider({
       }
     })
     setTasks(validatedTasks)
-  }, [product])
-
-  const getTaskById = useCallback(
-    (taskId: string): WorkflowTask | null =>
-      tasks.find((task) => task.id === taskId) || null,
-    [tasks]
-  )
-
-  const setDialog = useCallback((dialog: unknown) => {
-    if (isWorkflowDialogType(dialog)) {
-      setOpen(dialog)
-    }
   }, [])
+
+  useEffect(() => {
+    const config = getWorkflowConfig(product)
+    setConfig(config)
+    refreshTasks()
+  }, [product, refreshTasks])
 
   const createTask = useCallback(
     (
       proposalId: string,
-      initialStep: WorkflowStep,
+      step: WorkflowStep,
       assignedTo: string,
       assignedBy: string,
       comments?: string
     ): WorkflowTask => {
-      const now = new Date()
-      const task: WorkflowTask = {
-        id: generateWorkflowTaskId(),
-        proposalId,
-        currentStep: initialStep,
+      const taskId = generateWorkflowTaskId()
+      const historyEntry = createHistoryEntry(
+        step,
         assignedTo,
         assignedBy,
-        status: 'in_progress' as WorkflowTaskStatus,
-        history: [
-          createHistoryEntry(initialStep, assignedTo, assignedBy, comments),
-        ],
-        createdAt: now.toISOString(),
-        updatedAt: now.toISOString(),
+        comments
+      )
+
+      const newTask: WorkflowTask = {
+        id: taskId,
+        proposalId,
+        currentStep: step,
+        status: 'pending',
+        assignedTo,
+        assignedBy,
+        history: [historyEntry],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       }
 
-      const validatedTask = workflowTaskSchema.parse(task)
-      const updatedTasks = [...tasks, validatedTask]
-      setTasks(updatedTasks)
-      saveWorkflowTaskToStorage(updatedTasks)
-      return validatedTask
+      saveWorkflowTaskToStorage(newTask)
+      refreshTasks()
+      return newTask
     },
-    [tasks]
+    [refreshTasks]
   )
 
-  const handleTransition = useCallback(
-    (
-      taskId: string,
-      nextStep: WorkflowStep,
-      assignedTo: string,
-      assignedBy: string,
-      comments?: string
-    ): WorkflowTask | null => {
-      const task = getTaskById(taskId)
-      if (!task || !config) return null
-
-      const stepConfig = getStepConfig(config, task.currentStep)
-      if (!stepConfig?.nextSteps.includes(nextStep)) return null
-
-      const updatedTask = workflowTaskSchema.parse(
-        transitionTask(task, nextStep, assignedTo, assignedBy, comments)
-      )
-
-      const updatedTasks = tasks.map((t) => (t.id === taskId ? updatedTask : t))
-      setTasks(updatedTasks)
-      saveWorkflowTaskToStorage(updatedTasks)
-      return updatedTask
+  const updateTask = useCallback(
+    (task: WorkflowTask) => {
+      saveWorkflowTaskToStorage(task)
+      refreshTasks()
     },
-    [getTaskById, tasks, config]
+    [refreshTasks]
   )
 
-  const handleReassign = useCallback(
-    (
-      taskId: string,
-      newAssignee: string,
-      assignedBy: string,
-      comments?: string
-    ): WorkflowTask | null => {
-      const task = getTaskById(taskId)
-      if (!task || !config) return null
-
-      const stepConfig = getStepConfig(config, task.currentStep)
-      if (!stepConfig?.allowReassignment) return null
-
-      const updatedTask = workflowTaskSchema.parse(
-        reassignTask(task, newAssignee, assignedBy, comments)
-      )
-
-      const updatedTasks = tasks.map((t) => (t.id === taskId ? updatedTask : t))
-      setTasks(updatedTasks)
-      saveWorkflowTaskToStorage(updatedTasks)
-      return updatedTask
+  const deleteTask = useCallback(
+    (taskId: string) => {
+      deleteWorkflowTaskFromStorage(taskId)
+      refreshTasks()
     },
-    [getTaskById, tasks, config]
-  )
-
-  const handleSendBack = useCallback(
-    (
-      taskId: string,
-      previousStep: WorkflowStep,
-      assignedTo: string,
-      assignedBy: string,
-      comments?: string
-    ): WorkflowTask | null => {
-      const task = getTaskById(taskId)
-      if (!task || !config) return null
-
-      const stepConfig = getStepConfig(config, task.currentStep)
-      if (!stepConfig?.allowSendBack) return null
-
-      const updatedTask = workflowTaskSchema.parse(
-        sendBackTask(task, previousStep, assignedTo, assignedBy, comments)
-      )
-
-      const updatedTasks = tasks.map((t) => (t.id === taskId ? updatedTask : t))
-      setTasks(updatedTasks)
-      saveWorkflowTaskToStorage(updatedTasks)
-      return updatedTask
-    },
-    [getTaskById, tasks, config]
-  )
-
-  const handleComplete = useCallback(
-    (
-      taskId: string,
-      completedBy: string,
-      comments?: string
-    ): WorkflowTask | null => {
-      const task = getTaskById(taskId)
-      if (!task || !config) return null
-
-      const stepConfig = getStepConfig(config, task.currentStep)
-      if (!stepConfig?.nextSteps.includes('completed')) return null
-
-      const updatedTask = workflowTaskSchema.parse(
-        completeTask(task, completedBy, comments)
-      )
-
-      const updatedTasks = tasks.map((t) => (t.id === taskId ? updatedTask : t))
-      setTasks(updatedTasks)
-      saveWorkflowTaskToStorage(updatedTasks)
-      return updatedTask
-    },
-    [getTaskById, tasks, config]
+    [refreshTasks]
   )
 
   const value: WorkflowContextType = {
-    open,
-    setOpen: setDialog,
-    currentTask,
-    setCurrentTask: (task: unknown) => {
-      if (isWorkflowTask(task)) {
-        setCurrentTask(task)
-      }
-    },
+    currentTask: null,
+    setCurrentTask: () => {},
     tasks,
     config,
-    getTaskById,
-    loadWorkflowConfig: getWorkflowConfig,
+    refreshTasks,
     createTask,
-    transitionTaskToNextStep: handleTransition,
-    reassignTaskToUser: handleReassign,
-    sendTaskBack: handleSendBack,
-    completeWorkflowTask: handleComplete,
-    refreshTasks: async () => {
-      const storedTasks = getWorkflowTasksFromStorage() || []
-      const validatedTasks = storedTasks.filter((task) => {
-        try {
-          workflowTaskSchema.parse(task)
-          return true
-        } catch {
-          return false
-        }
-      })
-      setTasks(validatedTasks)
+    updateTask,
+    deleteTask,
+    getStepConfig: (config: WorkflowConfig, stepName: string) =>
+      getStepConfig(config, stepName),
+    createHistoryEntry: (
+      step: string,
+      assignedTo: string,
+      assignedBy: string,
+      comments?: string
+    ) => createHistoryEntry(step, assignedTo, assignedBy, comments),
+    transitionTask: (
+      task: WorkflowTask,
+      stepId: WorkflowStep,
+      assignedTo: string,
+      assignedBy: string,
+      comments?: string
+    ) => {
+      const updatedTask = transitionTask(
+        task,
+        stepId,
+        assignedTo,
+        assignedBy,
+        comments
+      )
+      updateTask(updatedTask)
+      return updatedTask
+    },
+    reassignTask: (
+      task: WorkflowTask,
+      userId: string,
+      assignedBy: string,
+      comments?: string
+    ) => {
+      const updatedTask = reassignTask(task, userId, assignedBy, comments)
+      updateTask(updatedTask)
+      return updatedTask
+    },
+    sendBackTask: (
+      task: WorkflowTask,
+      stepId: WorkflowStep,
+      assignedTo: string,
+      assignedBy: string,
+      comments?: string
+    ) => {
+      const updatedTask = sendBackTask(
+        task,
+        stepId,
+        assignedTo,
+        assignedBy,
+        comments
+      )
+      updateTask(updatedTask)
+      return updatedTask
+    },
+    completeTask: (
+      task: WorkflowTask,
+      assignedBy: string,
+      comments?: string
+    ) => {
+      const updatedTask = completeTask(task, assignedBy, comments)
+      updateTask(updatedTask)
+      return updatedTask
+    },
+    getTaskById: (id: string): WorkflowTask | undefined => {
+      return tasks.find((task) => task.id === id)
     },
   }
 
@@ -239,4 +240,13 @@ export function WorkflowProvider({
       {children}
     </WorkflowContext.Provider>
   )
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
+export function useWorkflow(): WorkflowContextType {
+  const context = React.useContext(WorkflowContext)
+  if (context === null) {
+    throw new Error('useWorkflow must be used within a WorkflowProvider')
+  }
+  return context
 }

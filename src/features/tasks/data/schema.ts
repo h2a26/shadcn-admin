@@ -1,7 +1,5 @@
 import { z } from 'zod'
 
-// We're keeping a simple non-relational data here.
-// IRL, you will have a data for your data models.
 export const taskSchema = z.object({
   id: z.string(),
   title: z.string(),
@@ -15,6 +13,33 @@ export const taskSchema = z.object({
   ]),
   label: z.string(),
   priority: z.string(),
+  workflowTask: z
+    .object({
+      id: z.string(),
+      proposalId: z.string(),
+      currentStep: z.string(),
+      assignedTo: z.string(),
+      assignedBy: z.string(),
+      status: z.enum([
+        'pending',
+        'in_progress',
+        'completed',
+        'rejected',
+        'sent_back',
+      ]),
+      history: z.array(
+        z.object({
+          assignedTo: z.string(),
+          assignedBy: z.string(),
+          step: z.string(),
+          timestamp: z.string(),
+          comments: z.string().optional(),
+        })
+      ),
+      createdAt: z.string(),
+      updatedAt: z.string(),
+    })
+    .optional(),
 })
 
 export type Task = z.infer<typeof taskSchema>

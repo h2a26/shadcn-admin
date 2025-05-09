@@ -9,33 +9,26 @@ import {
 import { Button } from '@/components/ui/button'
 import {
   Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
 } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { hasPermission } from '@/features/users/config/roles'
 import { useUsers } from '@/features/users/context/users-context'
 import { StepTransition } from '@/features/workflow/components/step-transition'
 import { TaskHistory } from '@/features/workflow/components/task-history'
-import { WorkflowStatusBadge } from '@/features/workflow/components/workflow-status-badge'
-import { useWorkflow } from '@/features/workflow/hooks/use-workflow.ts'
+import { useWorkflow } from '@/features/workflow/context/workflow-context'
+import { WorkflowStatusBadge } from '@/features/workflow/utils/workflow-components'
 import { ProposalFormData } from '../data/schema'
 
-// Use the same StoredProposal interface as in the context
-interface StoredProposal extends ProposalFormData {
-  id: string
-  createdAt: string
-  updatedAt?: string
-  status: 'draft' | 'submitted' | 'approved' | 'rejected'
-  workflowTaskId?: string
-  currentWorkflowStep?: string
-}
-
 interface ProposalWorkflowStatusProps {
-  proposal: StoredProposal
+  proposal: ProposalFormData & {
+    workflowTaskId: string
+    proposalId: string
+  }
 }
 
 export function ProposalWorkflowStatus({
@@ -45,58 +38,21 @@ export function ProposalWorkflowStatus({
   const { currentUser, users } = useUsers()
   const [showTransition, setShowTransition] = useState(false)
 
-  // If proposal has no workflow task, show a message
-  if (!proposal.workflowTaskId || !proposal.currentWorkflowStep) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Workflow Status</CardTitle>
-          <CardDescription>
-            This proposal is not part of a workflow
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className='flex items-center justify-center py-6'>
-            <p className='text-muted-foreground text-sm'>
-              No workflow task associated with this proposal
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
-
   const task = getTaskById(proposal.workflowTaskId)
-
-  // If task not found, show error
-  if (!task) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Workflow Status</CardTitle>
-          <CardDescription>Error: Workflow task not found</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className='flex items-center justify-center py-6'>
-            <p className='text-destructive text-sm'>
-              The workflow task (ID: {proposal.workflowTaskId}) could not be
-              found
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
 
   // Check if current user has permission to transition this task
   const canTransition =
     currentUser &&
     hasPermission(currentUser.role, 'workflow.transition') &&
-    task.assignedTo === currentUser.id
+    task?.assignedTo === currentUser.id
 
   // Check if current user has permission to view task history
   const canViewHistory =
     currentUser && hasPermission(currentUser.role, 'workflow.view')
+
+  if (!task) {
+    return <div className='text-yellow-500'>No workflow task assigned yet</div>
+  }
 
   return (
     <Card>
@@ -109,8 +65,8 @@ export function ProposalWorkflowStatus({
             </CardDescription>
           </div>
           <WorkflowStatusBadge
-            workflowTaskId={proposal.workflowTaskId}
-            currentStep={proposal.currentWorkflowStep}
+            workflowTaskId={task.id}
+            currentStep={task.currentStep}
           />
         </div>
       </CardHeader>

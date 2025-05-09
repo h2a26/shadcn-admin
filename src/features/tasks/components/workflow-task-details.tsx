@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import { Task } from '@/features/tasks/types/task'
 import { TaskDetailsEnhanced } from '@/features/workflow/components/task-details-enhanced'
-import { useWorkflow } from '@/features/workflow/context/workflow-context-exports'
+import { useWorkflow } from '@/features/workflow/context/workflow-context'
 import { useTasks } from '../context/tasks-context'
 
 interface WorkflowTaskDetailsProps {

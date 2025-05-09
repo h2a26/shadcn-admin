@@ -11,8 +11,10 @@ import { PremiumCalculationForm } from '@/features/proposal/components/premium-c
 import { ProposalStepperContent } from '@/features/proposal/components/proposal-stepper-content'
 import { ProposalStepperControls } from '@/features/proposal/components/proposal-stepper-controls'
 import { ProposalStepperNavigation } from '@/features/proposal/components/proposal-stepper-navigation'
+import { ProposalWorkflowStatus } from '@/features/proposal/components/proposal-workflow-status'
 import { ProposalWorkflowSubmit } from '@/features/proposal/components/proposal-workflow-submit'
 import { ShippingCoverageForm } from '@/features/proposal/components/shipping-coverage-form'
+import { useProposal } from '@/features/proposal/context/proposal-context'
 import {
   policyholderInfoSchema,
   parcelDetailsSchema,
@@ -298,6 +300,8 @@ const FormStepperComponent = () => {
     setFormData(null)
   }
 
+  const { currentProposal } = useProposal()
+
   return (
     <Form {...form}>
       {showWorkflowSubmit && formData ? (
@@ -317,6 +321,17 @@ const FormStepperComponent = () => {
             StepperStep={Stepper.Step}
             StepperTitle={Stepper.Title}
           />
+
+          {/* Workflow Status */}
+          {currentProposal?.workflowTaskId && (
+            <ProposalWorkflowStatus
+              proposal={{
+                ...currentProposal,
+                workflowTaskId: currentProposal.workflowTaskId,
+                proposalId: currentProposal.id,
+              }}
+            />
+          )}
 
           {/* Stepper Content */}
           <ProposalStepperContent

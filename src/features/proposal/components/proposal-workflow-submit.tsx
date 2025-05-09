@@ -18,7 +18,7 @@ import {
 } from '@/features/proposal/utils/proposal-utils'
 import { RoleBasedUserSelector } from '@/features/users/components/role-based-user-selector'
 import { useUsers } from '@/features/users/context/users-context'
-import { useWorkflow } from '@/features/workflow/hooks/use-workflow.ts'
+import { useWorkflow } from '@/features/workflow/context/workflow-context.tsx'
 
 interface ProposalWorkflowSubmitProps {
   proposalData: ProposalFormData
