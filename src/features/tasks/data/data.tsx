@@ -1,5 +1,6 @@
 import {
   IconArrowDown,
+  IconArrowLeft,
   IconArrowRight,
   IconArrowUp,
   IconCircle,
@@ -26,29 +27,40 @@ export const labels = [
 
 export const statuses = [
   {
-    value: 'backlog',
-    label: 'Backlog',
+    value: 'pending',
+    label: 'Pending',
     icon: IconExclamationCircle,
+    variant: 'secondary',
   },
   {
-    value: 'todo',
-    label: 'Todo',
+    value: 'workflow',
+    label: 'Workflow',
     icon: IconCircle,
+    variant: 'default',
   },
   {
-    value: 'in progress',
+    value: 'in_progress',
     label: 'In Progress',
     icon: IconStopwatch,
+    variant: 'default',
   },
   {
-    value: 'done',
-    label: 'Done',
+    value: 'completed',
+    label: 'Completed',
     icon: IconCircleCheck,
+    variant: 'outline',
   },
   {
-    value: 'canceled',
-    label: 'Canceled',
+    value: 'rejected',
+    label: 'Rejected',
     icon: IconCircleX,
+    variant: 'destructive',
+  },
+  {
+    value: 'sent_back',
+    label: 'Sent Back',
+    icon: IconArrowLeft,
+    variant: 'destructive',
   },
 ]
 

@@ -2,11 +2,16 @@ import { ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { labels, priorities, statuses } from '../data/data'
-import { Task } from '../data/schema'
 import { DataTableColumnHeader } from './data-table-column-header'
 import { DataTableRowActions } from './data-table-row-actions'
 
-export const columns: ColumnDef<Task>[] = [
+export const columns: ColumnDef<{
+  id: string
+  title: string
+  status: string
+  label: string
+  priority: string
+}>[] = [
   {
     id: 'select',
     header: ({ table }) => (
@@ -28,6 +33,7 @@ export const columns: ColumnDef<Task>[] = [
         className='translate-y-[2px]'
       />
     ),
+    accessorFn: (row) => row,
     enableSorting: false,
     enableHiding: false,
   },
@@ -36,6 +42,7 @@ export const columns: ColumnDef<Task>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Task' />
     ),
+    accessorFn: (row) => row.id,
     cell: ({ row }) => <div className='w-[80px]'>{row.getValue('id')}</div>,
     enableSorting: false,
     enableHiding: false,
@@ -45,15 +52,20 @@ export const columns: ColumnDef<Task>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Title' />
     ),
+    accessorFn: (row) => row.title,
     cell: ({ row }) => {
       const label = labels.find((label) => label.value === row.original.label)
 
       return (
-        <div className='flex space-x-2'>
-          {label && <Badge variant='outline'>{label.label}</Badge>}
-          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue('title')}
-          </span>
+        <div className='flex w-[240px] items-center space-x-2'>
+          <div className='min-w-0 flex-1'>
+            <p className='text-sm leading-6 font-medium'>
+              {row.getValue('title')}
+            </p>
+            <p className='text-muted-foreground mt-1 truncate text-xs leading-5'>
+              {label?.label ?? 'No label'}
+            </p>
+          </div>
         </div>
       )
     },
@@ -63,22 +75,25 @@ export const columns: ColumnDef<Task>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Status' />
     ),
+    accessorFn: (row) => row.status,
     cell: ({ row }) => {
       const status = statuses.find(
         (status) => status.value === row.getValue('status')
       )
-
-      if (!status) {
-        return null
-      }
-
-      return (
-        <div className='flex w-[100px] items-center'>
-          {status.icon && (
-            <status.icon className='text-muted-foreground mr-2 h-4 w-4' />
-          )}
-          <span>{status.label}</span>
-        </div>
+      return status ? (
+        <Badge
+          variant={
+            status.variant as
+              | 'secondary'
+              | 'default'
+              | 'outline'
+              | 'destructive'
+          }
+        >
+          {status.label}
+        </Badge>
+      ) : (
+        <Badge variant='outline'>Unknown</Badge>
       )
     },
     filterFn: (row, id, value) => {
@@ -114,6 +129,7 @@ export const columns: ColumnDef<Task>[] = [
   },
   {
     id: 'actions',
+    accessorFn: (row) => row,
     cell: ({ row }) => <DataTableRowActions row={row} />,
   },
 ]

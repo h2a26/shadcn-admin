@@ -5,7 +5,14 @@ import { z } from 'zod'
 export const taskSchema = z.object({
   id: z.string(),
   title: z.string(),
-  status: z.string(),
+  status: z.enum([
+    'pending',
+    'in_progress',
+    'completed',
+    'rejected',
+    'sent_back',
+    'workflow',
+  ]),
   label: z.string(),
   priority: z.string(),
 })

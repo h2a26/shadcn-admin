@@ -5,6 +5,7 @@ import {
   saveProposalToLocalStorage,
   updateProposalInLocalStorage,
   deleteProposalFromLocalStorage,
+  ProposalWorkflowData,
 } from '@/features/proposal/utils/proposal-utils'
 
 interface StoredProposal extends ProposalFormData {
@@ -12,6 +13,8 @@ interface StoredProposal extends ProposalFormData {
   createdAt: string
   updatedAt?: string
   status: 'draft' | 'submitted' | 'approved' | 'rejected'
+  workflowTaskId?: string
+  currentWorkflowStep?: string
 }
 
 interface ProposalContextType {
@@ -24,7 +27,10 @@ interface ProposalContextType {
 
   refreshProposals: () => void
   saveProposal: (proposal: ProposalFormData) => string
-  updateProposal: (id: string, proposal: Partial<ProposalFormData>) => boolean
+  updateProposal: (
+    id: string,
+    proposal: Partial<ProposalFormData> & ProposalWorkflowData
+  ) => boolean
   deleteProposal: (id: string) => boolean
 }
 
@@ -59,7 +65,7 @@ export function ProposalProvider({ children }: Props) {
 
   const updateProposal = (
     id: string,
-    proposal: Partial<ProposalFormData>
+    proposal: Partial<ProposalFormData> & ProposalWorkflowData
   ): boolean => {
     const success = updateProposalInLocalStorage(id, proposal)
     if (success) {

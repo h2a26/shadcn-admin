@@ -38,3 +38,5 @@ export interface DraftSortOptions {
   field: DraftSortField
   direction: SortDirection
 }
+
+export type { DraftSortField }

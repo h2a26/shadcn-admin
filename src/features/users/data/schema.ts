@@ -13,6 +13,10 @@ const userRoleSchema = z.union([
   z.literal('admin'),
   z.literal('cashier'),
   z.literal('manager'),
+  // Workflow-specific roles
+  z.literal('underwriter'),
+  z.literal('risk_reviewer'),
+  z.literal('approver'),
 ])
 
 const userSchema = z.object({

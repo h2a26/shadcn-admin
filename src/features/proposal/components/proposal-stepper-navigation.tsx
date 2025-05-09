@@ -1,21 +1,22 @@
 import React from 'react'
+import { ProposalStepId } from '../data/schema'
 
 interface StepperNavigationProps {
   steps: Array<{
-    id: string
+    id: ProposalStepId
     title: string
   }>
-  currentStepId: string
-  onStepClick: (stepId: string) => void
+  currentStepId: ProposalStepId
+  onStepClick: (stepId: ProposalStepId) => void
   StepperNavigation: React.ComponentType<
     React.PropsWithChildren<{ className?: string }>
   >
+  // Use any to allow for type conversion between string and ProposalStepId
   StepperStep: React.ComponentType<
-    React.PropsWithChildren<{
-      of: string
-      disabled?: boolean
-      onClick?: () => void
-    }>
+    React.ComponentProps<'button'> & {
+      of: ProposalStepId
+      icon?: React.ReactNode
+    }
   >
   StepperTitle: React.ComponentType<React.PropsWithChildren<object>>
 }
@@ -43,7 +44,7 @@ export function ProposalStepperNavigation({
               steps.findIndex((s) => s.id === step.id) <=
               steps.findIndex((s) => s.id === currentStepId)
             ) {
-              onStepClick(step.id)
+              onStepClick(step.id as ProposalStepId)
             }
           }}
         >

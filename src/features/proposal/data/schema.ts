@@ -99,10 +99,22 @@ export const premiumCalculationSchema = z.object({
   discountCode: z.string().optional().or(z.literal('')),
 })
 
+// Define a proper file schema for document uploads
+const fileSchema = z.object({
+  name: z.string(),
+  size: z.number(),
+  type: z.string(),
+  lastModified: z.number(),
+  // Base64 data or file reference
+  data: z.string().optional(),
+})
+
+export type FileUpload = z.infer<typeof fileSchema>
+
 export const documentsConsentSchema = z.object({
-  identityDoc: z.any().optional().nullable(),
-  ownershipProof: z.any().optional().nullable(),
-  invoice: z.any().optional().nullable(),
+  identityDoc: fileSchema.optional().nullable(),
+  ownershipProof: fileSchema.optional().nullable(),
+  invoice: fileSchema.optional().nullable(),
   agreeTerms: z.boolean().refine((val) => val, 'You must agree to the terms'),
   confirmAccuracy: z
     .boolean()

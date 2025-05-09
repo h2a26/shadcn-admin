@@ -3,6 +3,7 @@ import { ConfirmDialog } from '@/components/confirm-dialog'
 import { useTasks } from '../context/tasks-context'
 import { TasksImportDialog } from './tasks-import-dialog'
 import { TasksMutateDrawer } from './tasks-mutate-drawer'
+import { WorkflowTaskDetails } from './workflow-task-details'
 
 export function TasksDialogs() {
   const { open, setOpen, currentRow, setCurrentRow } = useTasks()
@@ -22,17 +23,32 @@ export function TasksDialogs() {
 
       {currentRow && (
         <>
-          <TasksMutateDrawer
-            key={`task-update-${currentRow.id}`}
-            open={open === 'update'}
-            onOpenChange={() => {
-              setOpen('update')
-              setTimeout(() => {
-                setCurrentRow(null)
-              }, 500)
-            }}
-            currentRow={currentRow}
-          />
+          {/* If this is a workflow task, show the workflow task details */}
+          {currentRow.status === 'workflow' ? (
+            <WorkflowTaskDetails
+              key={`workflow-task-${currentRow.id}`}
+              open={open === 'update'}
+              onClose={() => {
+                setOpen(null)
+                setTimeout(() => {
+                  setCurrentRow(null)
+                }, 500)
+              }}
+            />
+          ) : (
+            /* Otherwise show the regular task drawer */
+            <TasksMutateDrawer
+              key={`task-update-${currentRow.id}`}
+              open={open === 'update'}
+              onOpenChange={() => {
+                setOpen('update')
+                setTimeout(() => {
+                  setCurrentRow(null)
+                }, 500)
+              }}
+              currentRow={currentRow}
+            />
+          )}
 
           <ConfirmDialog
             key='task-delete'

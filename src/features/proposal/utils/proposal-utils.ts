@@ -9,6 +9,8 @@ interface StoredProposal extends ProposalFormData {
   createdAt: string
   updatedAt?: string
   status: 'draft' | 'submitted' | 'approved' | 'rejected'
+  workflowTaskId?: string
+  currentWorkflowStep?: string
 }
 
 export const generateProposalNumber = (nrcNumber: string): string => {
@@ -121,27 +123,43 @@ export const calculatePremium = (
   }
 }
 
+// Options for saving and updating proposals
+export interface ProposalWorkflowData {
+  workflowTaskId?: string
+  currentWorkflowStep?: string
+}
+
+// Use ProposalWorkflowData directly as options type
+
 export const saveProposalToLocalStorage = (
-  proposalData: ProposalFormData
+  proposalData: ProposalFormData,
+  options?: ProposalWorkflowData
 ): string => {
   try {
     const existingProposals = JSON.parse(
       localStorage.getItem('parcelInsuranceProposals') || '[]'
     ) as StoredProposal[]
 
-    const proposalWithTimestamp: StoredProposal = {
+    // Generate a unique ID for the proposal
+    const id = `proposal-${Date.now()}-${Math.floor(Math.random() * 1000)}`
+    const now = new Date().toISOString()
+
+    // Create the proposal object with metadata
+    const proposal: StoredProposal = {
       ...proposalData,
-      createdAt: new Date().toISOString(),
-      id: `proposal-${Date.now()}`,
-      status: 'draft', // Default status for new proposals
+      id,
+      createdAt: now,
+      status: 'submitted',
+      workflowTaskId: options?.workflowTaskId,
+      currentWorkflowStep: options?.currentWorkflowStep,
     }
 
     localStorage.setItem(
       'parcelInsuranceProposals',
-      JSON.stringify([...existingProposals, proposalWithTimestamp])
+      JSON.stringify([...existingProposals, proposal])
     )
 
-    return proposalWithTimestamp.id
+    return proposal.id
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : 'Unknown error'
@@ -182,7 +200,7 @@ export const getProposalsFromLocalStorage = (): StoredProposal[] => {
 
 export const updateProposalInLocalStorage = (
   id: string,
-  updatedData: Partial<ProposalFormData>
+  updatedData: Partial<ProposalFormData> & ProposalWorkflowData
 ): boolean => {
   try {
     const proposals = getProposalsFromLocalStorage()
