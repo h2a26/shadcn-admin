@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -27,23 +27,21 @@ interface RoleBasedUserSelectorProps {
 }
 
 export function RoleBasedUserSelector({
-  workflowStep,
-  onUserSelect,
-  selectedUserId,
-  placeholder = 'Select user',
-  disabled = false,
-}: RoleBasedUserSelectorProps) {
-  const { users, getUsersByRole } = useUsers()
+                                        workflowStep,
+                                        onUserSelect,
+                                        selectedUserId,
+                                        placeholder = 'Select user',
+                                        disabled = false,
+                                      }: RoleBasedUserSelectorProps) {
+  const { getUsersByRole } = useUsers()
   const [open, setOpen] = useState(false)
-  const [eligibleUsers, setEligibleUsers] = useState<User[]>([])
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
   // Get eligible roles for this workflow step
   const eligibleRoles = getRolesForWorkflowStep(workflowStep)
 
-  // When component mounts or when the workflow step changes,
-  // fetch all eligible users based on roles
-  useEffect(() => {
+  // Memoize the computation of eligible users to avoid redundant recalculations
+  const eligibleUsers = useMemo(() => {
     const allEligibleUsers: User[] = []
 
     eligibleRoles.forEach((role) => {
@@ -52,22 +50,30 @@ export function RoleBasedUserSelector({
     })
 
     // Remove duplicates (in case a user has multiple eligible roles)
-    const uniqueUsers = allEligibleUsers.filter(
+    return allEligibleUsers.filter(
       (user, index, self) => index === self.findIndex((u) => u.id === user.id)
     )
-
-    setEligibleUsers(uniqueUsers)
-  }, [workflowStep, users, getUsersByRole, eligibleRoles])
+  }, [eligibleRoles, getUsersByRole])
 
   // Set the selected user if selectedUserId is provided
   useEffect(() => {
-    if (selectedUserId) {
-      const user = eligibleUsers.find((u) => u.id === selectedUserId) || null
+    // Only update state if the selectedUserId is different from the current selected user
+    const user = eligibleUsers.find((u) => u.id === selectedUserId) || null
+    if (selectedUserId && user && user.id !== selectedUser?.id) {
       setSelectedUser(user)
-    } else {
+    } else if (!selectedUserId) {
       setSelectedUser(null)
     }
-  }, [selectedUserId, eligibleUsers])
+  }, [selectedUserId, eligibleUsers, selectedUser?.id])
+
+  // Handle case where no users are available for selection
+  if (eligibleUsers.length === 0) {
+    return (
+      <div className="text-sm text-gray-500">
+        No users available for this workflow step.
+      </div>
+    )
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
