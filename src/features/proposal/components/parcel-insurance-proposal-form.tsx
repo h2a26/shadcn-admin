@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useRouter } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { Form } from '@/components/ui/form'
@@ -12,7 +12,7 @@ import { ProposalStepperContent } from '@/features/proposal/components/proposal-
 import { ProposalStepperControls } from '@/features/proposal/components/proposal-stepper-controls'
 import { ProposalStepperNavigation } from '@/features/proposal/components/proposal-stepper-navigation'
 import { ProposalWorkflowStatus } from '@/features/proposal/components/proposal-workflow-status'
-import { ProposalWorkflowSubmit } from '@/features/proposal/components/proposal-workflow-submit'
+import { WorkflowSubmitForm } from '@/features/proposal/components/workflow-submit-form.tsx'
 import { ShippingCoverageForm } from '@/features/proposal/components/shipping-coverage-form'
 import { useProposal } from '@/features/proposal/context/proposal-context'
 import {
@@ -21,12 +21,12 @@ import {
   shippingCoverageSchema,
   premiumCalculationSchema,
   documentsConsentSchema,
+  workflowSubmitSchema,
   ProposalStepId,
-  ProposalFormData,
 } from '@/features/proposal/data/schema'
 import { useDraftOperations } from '@/features/proposal/hooks/use-draft-operations'
 import { useProposalForm } from '@/features/proposal/hooks/use-proposal-form'
-import { generateProposalNumber } from '@/features/proposal/utils'
+import { generateProposalNumber, saveProposalToLocalStorage } from '@/features/proposal/utils'
 import { getStepDescription } from '@/features/proposal/utils/stepper-utils'
 
 // Create the stepper with the proposal steps
@@ -60,6 +60,12 @@ const { Stepper, useStepper } = defineStepper(
     title: 'Documents & Consent',
     schema: documentsConsentSchema,
     Component: DocumentsConsentForm,
+  },
+  {
+    id: 'workflowSubmit' as ProposalStepId,
+    title: 'Workflow Submission',
+    schema: workflowSubmitSchema,
+    Component: WorkflowSubmitForm,
   }
 )
 
@@ -76,8 +82,6 @@ const FormStepperComponent = () => {
   const router = useRouter()
 
   const autoSaveIntervalRef = useRef<number | null>(null)
-  const [showWorkflowSubmit, setShowWorkflowSubmit] = useState<boolean>(false)
-  const [formData, setFormData] = useState<ProposalFormData | null>(null)
 
   const { form, formDataRef, getCurrentFormData, hasFormData, validateStep } =
     useProposalForm()
@@ -224,17 +228,25 @@ const FormStepperComponent = () => {
   const onSubmit = form.handleSubmit((data) => {
     try {
       if (methods.isLast) {
-        // Show the workflow submission dialog instead of submitting directly
-        setFormData(data)
-        setShowWorkflowSubmit(true)
+        // Save the proposal to local storage
+        const proposalId = saveProposalToLocalStorage(data)
+
+        toast.success('Proposal submitted successfully!', {
+          description: `Proposal ID: ${proposalId}`,
+          closeButton: true,
+          duration: 30000,
+          position: 'top-right',
+        })
+
+        // Reset the form and go back to the first step
+        form.reset()
+        methods.reset()
       } else {
         // Move to the next step
         methods.next()
       }
     } catch (error: unknown) {
-      // In a production environment, implement proper error handling and logging
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error'
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       toast.error(
         `There was an error submitting your proposal: ${errorMessage}`,
         {
@@ -285,72 +297,49 @@ const FormStepperComponent = () => {
     }
   }
 
-  // Handle workflow submission success
-  const handleWorkflowSuccess = () => {
-    // Reset the form and go back to the first step
-    form.reset()
-    methods.reset()
-    setShowWorkflowSubmit(false)
-    setFormData(null)
-  }
-
-  // Handle workflow submission cancel
-  const handleWorkflowCancel = () => {
-    setShowWorkflowSubmit(false)
-    setFormData(null)
-  }
-
   const { currentProposal } = useProposal()
 
   return (
     <Form {...form}>
-      {showWorkflowSubmit && formData ? (
-        <ProposalWorkflowSubmit
-          proposalData={formData}
-          onSuccess={handleWorkflowSuccess}
-          onCancel={handleWorkflowCancel}
+      <form onSubmit={onSubmit} className='space-y-6'>
+        {/* Stepper Navigation */}
+        <ProposalStepperNavigation
+          steps={methods.all}
+          currentStepId={methods.current.id}
+          onStepClick={(stepId) => methods.goTo(stepId as ProposalStepId)}
+          StepperNavigation={Stepper.Navigation}
+          StepperStep={Stepper.Step}
+          StepperTitle={Stepper.Title}
         />
-      ) : (
-        <form onSubmit={onSubmit} className='space-y-6'>
-          {/* Stepper Navigation */}
-          <ProposalStepperNavigation
-            steps={methods.all}
-            currentStepId={methods.current.id}
-            onStepClick={(stepId) => methods.goTo(stepId as ProposalStepId)}
-            StepperNavigation={Stepper.Navigation}
-            StepperStep={Stepper.Step}
-            StepperTitle={Stepper.Title}
-          />
 
-          {/* Workflow Status */}
-          {currentProposal?.workflowTaskId && (
-            <ProposalWorkflowStatus
-              proposal={{
-                ...currentProposal,
-                workflowTaskId: currentProposal.workflowTaskId,
-                proposalId: currentProposal.id,
-              }}
-            />
-          )}
-
-          {/* Stepper Content */}
-          <ProposalStepperContent
-            currentStep={methods.current}
-            getStepDescription={getStepDescription}
+        {/* Workflow Status */}
+        {currentProposal?.workflowTaskId && (
+          <ProposalWorkflowStatus
+            proposal={{
+              ...currentProposal,
+              workflowTaskId: currentProposal.workflowTaskId,
+              proposalId: currentProposal.id,
+            }}
           />
+        )}
 
-          {/* Stepper Controls */}
-          <ProposalStepperControls
-            isFirstStep={methods.isFirst}
-            isLastStep={methods.isLast}
-            onPrevious={methods.prev}
-            onContinue={handleContinue}
-            onSaveDraft={() =>
-              saveAsDraft(methods.current.id as ProposalStepId)
-            }
-          />
-        </form>
-      )}
+        {/* Stepper Content */}
+        <ProposalStepperContent
+          currentStep={methods.current}
+          getStepDescription={getStepDescription}
+        />
+
+        {/* Stepper Controls */}
+        <ProposalStepperControls
+          isFirstStep={methods.isFirst}
+          isLastStep={methods.isLast}
+          onPrevious={methods.prev}
+          onContinue={handleContinue}
+          onSaveDraft={() =>
+            saveAsDraft(methods.current.id as ProposalStepId)
+          }
+        />
+      </form>
     </Form>
   )
 }

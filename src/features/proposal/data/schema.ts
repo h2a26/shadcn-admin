@@ -109,8 +109,6 @@ const fileSchema = z.object({
   data: z.string().optional(),
 })
 
-export type FileUpload = z.infer<typeof fileSchema>
-
 export const documentsConsentSchema = z.object({
   identityDoc: fileSchema.optional().nullable(),
   ownershipProof: fileSchema.optional().nullable(),
@@ -121,12 +119,21 @@ export const documentsConsentSchema = z.object({
     .refine((val) => val, 'You must confirm accuracy'),
 })
 
+
+export const workflowSubmitSchema = z.object({
+  assignedTo: z.string().min(1, 'Assignee is required'),
+  comments: z.string().optional(),
+  workflowStep: z.enum(['proposal', 'risk_review', 'approval'] as const).default('proposal'),
+})
+
+
 export const proposalFormSchema = z.object({
   policyholderInfo: policyholderInfoSchema,
   parcelDetails: parcelDetailsSchema,
   shippingCoverage: shippingCoverageSchema,
   premiumCalculation: premiumCalculationSchema,
   documentsConsent: documentsConsentSchema,
+  workflowSubmit: workflowSubmitSchema,
 })
 
 export type PolicyholderInfo = z.infer<typeof policyholderInfoSchema>
@@ -134,6 +141,7 @@ export type ParcelDetails = z.infer<typeof parcelDetailsSchema>
 export type ShippingCoverage = z.infer<typeof shippingCoverageSchema>
 export type PremiumCalculation = z.infer<typeof premiumCalculationSchema>
 export type DocumentsConsent = z.infer<typeof documentsConsentSchema>
+export type WorkflowSubmit = z.infer<typeof workflowSubmitSchema>
 export type ProposalFormData = z.infer<typeof proposalFormSchema>
 
 export type CoverageType = 'Basic' | 'Standard' | 'Premium' | 'Custom'
@@ -155,3 +163,4 @@ export type ProposalStepId =
   | 'shippingCoverage'
   | 'premiumCalculation'
   | 'documentsConsent'
+  | 'workflowSubmit'

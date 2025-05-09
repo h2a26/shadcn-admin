@@ -17,13 +17,14 @@ function proposalToDraft(
     title = `${proposal.parcelDetails.description}`
   }
 
-  const totalSteps = 5
+  const totalSteps = 6
   const stepIndices = {
     policyholderInfo: 1,
     parcelDetails: 2,
     shippingCoverage: 3,
     premiumCalculation: 4,
     documentsConsent: 5,
+    workflowSubmit: 6
   }
 
   const currentStepIndex =
