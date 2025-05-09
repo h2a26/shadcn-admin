@@ -20,47 +20,50 @@ export function WorkflowSubmitForm() {
     formState: { errors },
   } = useFormContext<{ workflowSubmit: WorkflowSubmit }>()
 
-  // Watch the assignee to ensure correct data binding
   const selectedAssignee = watch('workflowSubmit.assignedTo')
 
   return (
-    <Card className="mx-auto w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Submit Proposal</CardTitle>
-        <CardDescription>
-          Assign this proposal to a reviewer in the workflow
+    <Card className="mx-auto w-full max-w-lg rounded-2xl shadow-md border border-muted">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-xl font-semibold">Submit Proposal</CardTitle>
+        <CardDescription className="text-sm text-muted-foreground">
+          Choose a reviewer and optionally leave comments before submitting.
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="space-y-4">
-        {/* Role Based User Selector */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Assign To</label>
+      <CardContent className="space-y-6">
+        {/* Assignee Selector */}
+        <div className="space-y-1">
+          <label htmlFor="assignee" className="block text-sm font-medium">
+            Assign To <span className="text-red-500">*</span>
+          </label>
           <RoleBasedUserSelector
             workflowStep={INITIAL_WORKFLOW_STEP}
             selectedUserId={selectedAssignee}
             onUserSelect={(user) =>
               setValue('workflowSubmit.assignedTo', user.id, { shouldValidate: true })
             }
-            placeholder="Select assignee"
+            placeholder="Select a reviewer"
           />
           {errors.workflowSubmit?.assignedTo && (
-            <p className="text-sm text-red-500">
+            <p className="text-xs text-destructive mt-1">
               {errors.workflowSubmit.assignedTo.message}
             </p>
           )}
         </div>
 
-        {/* Comments Textarea */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Comments</label>
+        {/* Comments Section */}
+        <div className="space-y-1">
+          <label htmlFor="comments" className="block text-sm font-medium">
+            Comments
+          </label>
           <Textarea
             {...register('workflowSubmit.comments')}
-            placeholder="Add any comments about this proposal"
+            placeholder="Add any comments about this proposal..."
             className="min-h-[100px]"
           />
           {errors.workflowSubmit?.comments && (
-            <p className="text-sm text-red-500">
+            <p className="text-xs text-destructive mt-1">
               {errors.workflowSubmit.comments.message}
             </p>
           )}

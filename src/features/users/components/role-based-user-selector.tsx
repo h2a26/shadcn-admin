@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -35,41 +35,61 @@ export function RoleBasedUserSelector({
                                       }: RoleBasedUserSelectorProps) {
   const { getUsersByRole } = useUsers()
   const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
-  // Get eligible roles for this workflow step
-  const eligibleRoles = getRolesForWorkflowStep(workflowStep)
+  const eligibleRoles = useMemo(() => getRolesForWorkflowStep(workflowStep), [workflowStep])
 
-  // Memoize the computation of eligible users to avoid redundant recalculations
   const eligibleUsers = useMemo(() => {
-    const allEligibleUsers: User[] = []
+    const users = eligibleRoles.flatMap(role =>
+      getUsersByRole(role.id as RoleId)
+    )
 
-    eligibleRoles.forEach((role) => {
-      const usersWithRole = getUsersByRole(role.id as RoleId)
-      allEligibleUsers.push(...usersWithRole)
+    // Deduplicate by user ID
+    const uniqueUsersMap = new Map<string, User>()
+    users.forEach(user => {
+      if (!uniqueUsersMap.has(user.id)) {
+        uniqueUsersMap.set(user.id, user)
+      }
     })
 
-    // Remove duplicates (in case a user has multiple eligible roles)
-    return allEligibleUsers.filter(
-      (user, index, self) => index === self.findIndex((u) => u.id === user.id)
-    )
+    return Array.from(uniqueUsersMap.values())
   }, [eligibleRoles, getUsersByRole])
 
-  // Set the selected user if selectedUserId is provided
-  useEffect(() => {
-    // Only update state if the selectedUserId is different from the current selected user
-    const user = eligibleUsers.find((u) => u.id === selectedUserId) || null
-    if (selectedUserId && user && user.id !== selectedUser?.id) {
-      setSelectedUser(user)
-    } else if (!selectedUserId) {
-      setSelectedUser(null)
-    }
-  }, [selectedUserId, eligibleUsers, selectedUser?.id])
+  const filteredUsers = useMemo(() => {
+    const term = search.trim().toLowerCase()
+    if (!term) return eligibleUsers
+    console.log('search term', term)
+    return eligibleUsers.filter(user => {
+      const fullName = `${user.firstName} ${user.lastName}`.toLowerCase()
+      return (
+        fullName.includes(term) ||
+        user.firstName.toLowerCase().includes(term) ||
+        user.lastName.toLowerCase().includes(term) ||
+        user.role.toLowerCase().includes(term)
+      )
+    })
+  }, [search, eligibleUsers])
 
-  // Handle case where no users are available for selection
-  if (eligibleUsers.length === 0) {
+  // Sync selected user with selectedUserId prop
+  useEffect(() => {
+    const match = eligibleUsers.find(u => u.id === selectedUserId) || null
+    setSelectedUser(prev => (match?.id !== prev?.id ? match : prev))
+  }, [selectedUserId, eligibleUsers])
+
+  const handleSelectUser = useCallback(
+    (user: User) => {
+      setSelectedUser(user)
+      onUserSelect(user)
+      setOpen(false)
+      setSearch('')
+    },
+    [onUserSelect]
+  )
+
+  if (!eligibleUsers.length) {
     return (
-      <div className="text-sm text-gray-500">
+      <div className="text-sm text-muted-foreground px-2 py-2 border rounded-md bg-muted">
         No users available for this workflow step.
       </div>
     )
@@ -79,40 +99,55 @@ export function RoleBasedUserSelector({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant='outline'
-          role='combobox'
+          variant="outline"
+          role="combobox"
           aria-expanded={open}
-          className='w-full justify-between'
+          className={cn(
+            'w-full justify-between px-4 py-2 text-sm font-normal rounded-md border focus:outline-none focus:ring-2 focus:ring-primary',
+            disabled && 'cursor-not-allowed opacity-50'
+          )}
           disabled={disabled}
         >
-          {selectedUser
-            ? `${selectedUser.firstName} ${selectedUser.lastName}`
-            : placeholder}
-          <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+          {selectedUser ? (
+            `${selectedUser.firstName} ${selectedUser.lastName}`
+          ) : (
+            <span className="text-muted-foreground">{placeholder}</span>
+          )}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className='w-[300px] p-0'>
+      <PopoverContent
+        className="min-w-[360px] max-w-[480px] p-0 rounded-md shadow-lg border z-50"
+        align="start"
+      >
         <Command>
-          <CommandInput placeholder='Search user...' />
-          <CommandEmpty>No user found.</CommandEmpty>
+          <CommandInput
+            placeholder="Search user..."
+            value={search}
+            onValueChange={setSearch}
+            className="px-3 py-2 text-sm"
+          />
+          <CommandEmpty>No users found.</CommandEmpty>
           <CommandGroup>
-            {eligibleUsers.map((user) => (
+            {filteredUsers.map((user) => (
               <CommandItem
                 key={user.id}
-                value={user.id}
-                onSelect={() => {
-                  setSelectedUser(user)
-                  onUserSelect(user)
-                  setOpen(false)
-                }}
+                value={`${user.firstName} ${user.lastName} ${user.role}`}
+                onSelect={() => handleSelectUser(user)}
+                className="flex items-center gap-2 text-sm"
               >
                 <Check
                   className={cn(
-                    'mr-2 h-4 w-4',
+                    'h-4 w-4 text-primary',
                     selectedUser?.id === user.id ? 'opacity-100' : 'opacity-0'
                   )}
                 />
-                {user.firstName} {user.lastName} ({user.role})
+                <span>
+                  {user.firstName} {user.lastName}
+                  <span className="ml-1 text-xs text-muted-foreground">
+                    ({user.role})
+                  </span>
+                </span>
               </CommandItem>
             ))}
           </CommandGroup>
