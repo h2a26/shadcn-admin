@@ -1,8 +1,13 @@
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
-
 import {
   ParcelDetails,
   PremiumCalculation,
@@ -11,11 +16,7 @@ import {
 import { calculatePremium } from '@/features/proposal/utils'
 
 export function PremiumCalculationForm() {
-  const {
-    control,
-    watch,
-    setValue
-  } = useFormContext<{
+  const { control, watch, setValue } = useFormContext<{
     premiumCalculation: PremiumCalculation
     parcelDetails: ParcelDetails
     shippingCoverage: ShippingCoverage

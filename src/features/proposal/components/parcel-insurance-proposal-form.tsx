@@ -12,8 +12,8 @@ import { ProposalStepperContent } from '@/features/proposal/components/proposal-
 import { ProposalStepperControls } from '@/features/proposal/components/proposal-stepper-controls'
 import { ProposalStepperNavigation } from '@/features/proposal/components/proposal-stepper-navigation'
 import { ProposalWorkflowStatus } from '@/features/proposal/components/proposal-workflow-status'
-import { WorkflowSubmitForm } from '@/features/proposal/components/workflow-submit-form.tsx'
 import { ShippingCoverageForm } from '@/features/proposal/components/shipping-coverage-form'
+import { WorkflowSubmitForm } from '@/features/proposal/components/workflow-submit-form'
 import { useProposal } from '@/features/proposal/context/proposal-context'
 import {
   policyholderInfoSchema,
@@ -26,7 +26,10 @@ import {
 } from '@/features/proposal/data/schema'
 import { useDraftOperations } from '@/features/proposal/hooks/use-draft-operations'
 import { useProposalForm } from '@/features/proposal/hooks/use-proposal-form'
-import { generateProposalNumber, saveProposalToLocalStorage } from '@/features/proposal/utils'
+import {
+  generateProposalNumber,
+  saveProposalToLocalStorage,
+} from '@/features/proposal/utils'
 import { getStepDescription } from '@/features/proposal/utils/stepper-utils'
 
 // Create the stepper with the proposal steps
@@ -246,7 +249,8 @@ const FormStepperComponent = () => {
         methods.next()
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error'
       toast.error(
         `There was an error submitting your proposal: ${errorMessage}`,
         {
@@ -335,9 +339,7 @@ const FormStepperComponent = () => {
           isLastStep={methods.isLast}
           onPrevious={methods.prev}
           onContinue={handleContinue}
-          onSaveDraft={() =>
-            saveAsDraft(methods.current.id as ProposalStepId)
-          }
+          onSaveDraft={() => saveAsDraft(methods.current.id as ProposalStepId)}
         />
       </form>
     </Form>

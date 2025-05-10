@@ -59,9 +59,11 @@ export function ShippingCoverageForm() {
         name='shippingCoverage.origin'
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Origin <span className="text-red-500">*</span></FormLabel>
+            <FormLabel>
+              Origin <span className='text-red-500'>*</span>
+            </FormLabel>
             <FormControl>
-            <Input placeholder='Enter origin location' {...field} />
+              <Input placeholder='Enter origin location' {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -73,9 +75,11 @@ export function ShippingCoverageForm() {
         name='shippingCoverage.destination'
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Destination <span className="text-red-500">*</span></FormLabel>
+            <FormLabel>
+              Destination <span className='text-red-500'>*</span>
+            </FormLabel>
             <FormControl>
-            <Input placeholder='Enter destination location' {...field} />
+              <Input placeholder='Enter destination location' {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -167,7 +171,9 @@ export function ShippingCoverageForm() {
         name='shippingCoverage.coverageType'
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Coverage Type <span className="text-red-500">*</span></FormLabel>
+            <FormLabel>
+              Coverage Type <span className='text-red-500'>*</span>
+            </FormLabel>
             <Select onValueChange={field.onChange} defaultValue={field.value}>
               <FormControl>
                 <SelectTrigger>

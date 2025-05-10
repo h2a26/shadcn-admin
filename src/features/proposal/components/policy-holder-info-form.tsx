@@ -1,13 +1,17 @@
 import { useFormContext } from 'react-hook-form'
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form.tsx'
 import { Input } from '@/components/ui/input'
-import { PolicyholderInfo } from '@/features/proposal/data/schema'
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx'
 import { Textarea } from '@/components/ui/textarea'
+import { PolicyholderInfo } from '@/features/proposal/data/schema'
 
 export function PolicyholderInfoForm() {
-  const {
-    control
-  } = useFormContext<{ policyholderInfo: PolicyholderInfo }>()
+  const { control } = useFormContext<{ policyholderInfo: PolicyholderInfo }>()
 
   return (
     <div className='space-y-4 text-start'>
@@ -16,7 +20,9 @@ export function PolicyholderInfoForm() {
         name='policyholderInfo.fullName'
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Full Name <span className="text-red-500">*</span></FormLabel>
+            <FormLabel>
+              Full Name <span className='text-red-500'>*</span>
+            </FormLabel>
             <FormControl>
               <Input placeholder='Enter full name' {...field} />
             </FormControl>
@@ -30,7 +36,9 @@ export function PolicyholderInfoForm() {
         name='policyholderInfo.phoneNumber'
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Phone Number <span className="text-red-500">*</span></FormLabel>
+            <FormLabel>
+              Phone Number <span className='text-red-500'>*</span>
+            </FormLabel>
             <FormControl>
               <Input placeholder='Enter phone number' {...field} />
             </FormControl>
@@ -58,9 +66,11 @@ export function PolicyholderInfoForm() {
         name='policyholderInfo.nrcNumber'
         render={({ field }) => (
           <FormItem>
-            <FormLabel>NRC Number <span className="text-red-500">*</span></FormLabel>
+            <FormLabel>
+              NRC Number <span className='text-red-500'>*</span>
+            </FormLabel>
             <FormControl>
-            <Input placeholder='Enter NRC number' {...field} />
+              <Input placeholder='Enter NRC number' {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>

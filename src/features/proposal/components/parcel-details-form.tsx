@@ -19,9 +19,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { ParcelCategory, ParcelDetails } from '@/features/proposal/data/schema'
 
 export function ParcelDetailsForm() {
-  const {
-    control,
-  } = useFormContext<{ parcelDetails: ParcelDetails }>()
+  const { control } = useFormContext<{ parcelDetails: ParcelDetails }>()
 
   const parcelCategories: ParcelCategory[] = [
     'Electronics',
@@ -65,11 +63,11 @@ export function ParcelDetailsForm() {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                        {parcelCategories.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
+                {parcelCategories.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <FormMessage />
@@ -157,7 +155,7 @@ export function ParcelDetailsForm() {
         control={control}
         name='parcelDetails.fragileItem'
         render={({ field }) => (
-          <FormItem className='flex flex-row items-start space-x-3 space-y-0'>
+          <FormItem className='flex flex-row items-start space-y-0 space-x-3'>
             <FormControl>
               <Checkbox
                 id='parcelDetails.fragileItem'
@@ -179,7 +177,7 @@ export function ParcelDetailsForm() {
         control={control}
         name='parcelDetails.highRiskItem'
         render={({ field }) => (
-          <FormItem className='flex flex-row items-start space-x-3 space-y-0'>
+          <FormItem className='flex flex-row items-start space-y-0 space-x-3'>
             <FormControl>
               <Checkbox
                 id='parcelDetails.highRiskItem'
@@ -196,7 +194,6 @@ export function ParcelDetailsForm() {
           </FormItem>
         )}
       />
-
     </div>
   )
 }

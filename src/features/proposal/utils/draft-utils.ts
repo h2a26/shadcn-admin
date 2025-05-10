@@ -24,7 +24,7 @@ function proposalToDraft(
     shippingCoverage: 3,
     premiumCalculation: 4,
     documentsConsent: 5,
-    workflowSubmit: 6
+    workflowSubmit: 6,
   }
 
   const currentStepIndex =

@@ -6,8 +6,8 @@ import { ThemeSwitch } from '@/components/theme-switch'
 import { DraftsProvider } from '@/features/drafts'
 import { ParcelInsuranceProposalForm } from '@/features/proposal/components/parcel-insurance-proposal-form'
 import { ProposalProvider } from '@/features/proposal/context/proposal-context'
-import { WorkflowProvider } from '@/features/workflow/context/workflow-context.tsx'
-import UsersProvider from '@/features/users/context/users-context.tsx'
+import UsersProvider from '@/features/users/context/users-context'
+import { WorkflowProvider } from '@/features/workflow/context/workflow-context'
 
 export default function Proposal() {
   return (

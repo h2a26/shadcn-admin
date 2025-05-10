@@ -27,27 +27,30 @@ interface RoleBasedUserSelectorProps {
 }
 
 export function RoleBasedUserSelector({
-                                        workflowStep,
-                                        onUserSelect,
-                                        selectedUserId,
-                                        placeholder = 'Select user',
-                                        disabled = false,
-                                      }: RoleBasedUserSelectorProps) {
+  workflowStep,
+  onUserSelect,
+  selectedUserId,
+  placeholder = 'Select user',
+  disabled = false,
+}: RoleBasedUserSelectorProps) {
   const { getUsersByRole } = useUsers()
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
-  const eligibleRoles = useMemo(() => getRolesForWorkflowStep(workflowStep), [workflowStep])
+  const eligibleRoles = useMemo(
+    () => getRolesForWorkflowStep(workflowStep),
+    [workflowStep]
+  )
 
   const eligibleUsers = useMemo(() => {
-    const users = eligibleRoles.flatMap(role =>
+    const users = eligibleRoles.flatMap((role) =>
       getUsersByRole(role.id as RoleId)
     )
 
     // Deduplicate by user ID
     const uniqueUsersMap = new Map<string, User>()
-    users.forEach(user => {
+    users.forEach((user) => {
       if (!uniqueUsersMap.has(user.id)) {
         uniqueUsersMap.set(user.id, user)
       }
@@ -59,7 +62,7 @@ export function RoleBasedUserSelector({
   const filteredUsers = useMemo(() => {
     const term = search.trim().toLowerCase()
     if (!term) return eligibleUsers
-    return eligibleUsers.filter(user => {
+    return eligibleUsers.filter((user) => {
       const fullName = `${user.firstName} ${user.lastName}`.toLowerCase()
       return (
         fullName.includes(term) ||
@@ -72,8 +75,8 @@ export function RoleBasedUserSelector({
 
   // Sync selected user with selectedUserId prop
   useEffect(() => {
-    const match = eligibleUsers.find(u => u.id === selectedUserId) || null
-    setSelectedUser(prev => (match?.id !== prev?.id ? match : prev))
+    const match = eligibleUsers.find((u) => u.id === selectedUserId) || null
+    setSelectedUser((prev) => (match?.id !== prev?.id ? match : prev))
   }, [selectedUserId, eligibleUsers])
 
   const handleSelectUser = useCallback(
@@ -88,7 +91,7 @@ export function RoleBasedUserSelector({
 
   if (!eligibleUsers.length) {
     return (
-      <div className="text-sm text-muted-foreground px-2 py-2 border rounded-md bg-muted">
+      <div className='text-muted-foreground bg-muted rounded-md border px-2 py-2 text-sm'>
         No users available for this workflow step.
       </div>
     )
@@ -98,11 +101,11 @@ export function RoleBasedUserSelector({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
-          role="combobox"
+          variant='outline'
+          role='combobox'
           aria-expanded={open}
           className={cn(
-            'w-full justify-between px-4 py-2 text-sm font-normal rounded-md border focus:outline-none focus:ring-2 focus:ring-primary',
+            'focus:ring-primary w-full justify-between rounded-md border px-4 py-2 text-sm font-normal focus:ring-2 focus:outline-none',
             disabled && 'cursor-not-allowed opacity-50'
           )}
           disabled={disabled}
@@ -110,21 +113,21 @@ export function RoleBasedUserSelector({
           {selectedUser ? (
             `${selectedUser.firstName} ${selectedUser.lastName}`
           ) : (
-            <span className="text-muted-foreground">{placeholder}</span>
+            <span className='text-muted-foreground'>{placeholder}</span>
           )}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="min-w-[360px] max-w-[480px] p-0 rounded-md shadow-lg border z-50"
-        align="start"
+        className='z-50 max-w-[480px] min-w-[360px] rounded-md border p-0 shadow-lg'
+        align='start'
       >
         <Command>
           <CommandInput
-            placeholder="Search user..."
+            placeholder='Search user...'
             value={search}
             onValueChange={setSearch}
-            className="px-3 py-2 text-sm"
+            className='px-3 py-2 text-sm'
           />
           <CommandEmpty>No users found.</CommandEmpty>
           <CommandGroup>
@@ -133,17 +136,17 @@ export function RoleBasedUserSelector({
                 key={user.id}
                 value={`${user.firstName} ${user.lastName} ${user.role}`}
                 onSelect={() => handleSelectUser(user)}
-                className="flex items-center gap-2 text-sm"
+                className='flex items-center gap-2 text-sm'
               >
                 <Check
                   className={cn(
-                    'h-4 w-4 text-primary',
+                    'text-primary h-4 w-4',
                     selectedUser?.id === user.id ? 'opacity-100' : 'opacity-0'
                   )}
                 />
                 <span>
                   {user.firstName} {user.lastName}
-                  <span className="ml-1 text-xs text-muted-foreground">
+                  <span className='text-muted-foreground ml-1 text-xs'>
                     ({user.role})
                   </span>
                 </span>

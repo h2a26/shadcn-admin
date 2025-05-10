@@ -160,7 +160,11 @@ export const documentsConsentSchema = z.object({
 })
 
 export const workflowSubmitSchema = z.object({
-  assignedTo: z.string().min(1, 'Assignee is required'),
+  assignedTo: z
+    .string({
+      required_error: 'Assignee is required', // Handles both undefined and empty string; no need for invalid_type_error unless null is expected
+    })
+    .min(1, 'Assignee is required'),
   comments: z.string().optional(),
   workflowStep: z
     .enum(['proposal', 'risk_review', 'approval'] as const)
