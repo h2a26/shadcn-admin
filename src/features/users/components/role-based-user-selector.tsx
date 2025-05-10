@@ -59,7 +59,6 @@ export function RoleBasedUserSelector({
   const filteredUsers = useMemo(() => {
     const term = search.trim().toLowerCase()
     if (!term) return eligibleUsers
-    console.log('search term', term)
     return eligibleUsers.filter(user => {
       const fullName = `${user.firstName} ${user.lastName}`.toLowerCase()
       return (

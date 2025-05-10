@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { Input } from '@/components/ui/input'
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
+
 import {
   ParcelDetails,
   PremiumCalculation,
@@ -10,10 +12,9 @@ import { calculatePremium } from '@/features/proposal/utils'
 
 export function PremiumCalculationForm() {
   const {
-    register,
+    control,
     watch,
-    setValue,
-    formState: { errors },
+    setValue
   } = useFormContext<{
     premiumCalculation: PremiumCalculation
     parcelDetails: ParcelDetails
@@ -24,7 +25,6 @@ export function PremiumCalculationForm() {
   const shippingCoverage = watch('shippingCoverage')
   const discountCode = watch('premiumCalculation.discountCode')
 
-  // Calculate premium whenever relevant fields change
   useEffect(() => {
     if (parcelDetails?.declaredValue && shippingCoverage?.coverageType) {
       const { basePremium, riskLoad, totalPremium } = calculatePremium(
@@ -41,88 +41,78 @@ export function PremiumCalculationForm() {
 
   return (
     <div className='space-y-4 text-start'>
-      <div className='space-y-2'>
-        <label
-          htmlFor={register('premiumCalculation.proposalNo').name}
-          className='text-primary block text-sm font-medium'
-        >
-          Proposal Number
-        </label>
-        <Input
-          id={register('premiumCalculation.proposalNo').name}
-          {...register('premiumCalculation.proposalNo')}
-          className='bg-muted block w-full rounded-md border p-2'
-          readOnly
-        />
-        {errors.premiumCalculation?.proposalNo && (
-          <span className='text-destructive text-sm'>
-            {errors.premiumCalculation.proposalNo.message}
-          </span>
+      <FormField
+        control={control}
+        name='premiumCalculation.proposalNo'
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Proposal Number</FormLabel>
+            <FormControl>
+              <Input {...field} readOnly className='bg-muted' />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
         )}
-      </div>
+      />
 
-      <div className='space-y-2'>
-        <label
-          htmlFor={register('premiumCalculation.basePremium').name}
-          className='text-primary block text-sm font-medium'
-        >
-          Base Premium
-        </label>
-        <Input
-          id={register('premiumCalculation.basePremium').name}
-          {...register('premiumCalculation.basePremium')}
-          className='bg-muted block w-full rounded-md border p-2'
-          readOnly
-        />
-      </div>
+      <FormField
+        control={control}
+        name='premiumCalculation.basePremium'
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Base Premium</FormLabel>
+            <FormControl>
+              <Input {...field} readOnly className='bg-muted' />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-      <div className='space-y-2'>
-        <label
-          htmlFor={register('premiumCalculation.riskLoad').name}
-          className='text-primary block text-sm font-medium'
-        >
-          Risk Load
-        </label>
-        <Input
-          id={register('premiumCalculation.riskLoad').name}
-          {...register('premiumCalculation.riskLoad')}
-          className='bg-muted block w-full rounded-md border p-2'
-          readOnly
-        />
-      </div>
+      <FormField
+        control={control}
+        name='premiumCalculation.riskLoad'
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Risk Load</FormLabel>
+            <FormControl>
+              <Input {...field} readOnly className='bg-muted' />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-      <div className='space-y-2'>
-        <label
-          htmlFor={register('premiumCalculation.totalPremium').name}
-          className='text-primary block text-sm font-bold font-medium'
-        >
-          Total Premium
-        </label>
-        <Input
-          id={register('premiumCalculation.totalPremium').name}
-          {...register('premiumCalculation.totalPremium')}
-          className='bg-muted block w-full rounded-md border p-2 font-bold'
-          readOnly
-        />
-      </div>
+      <FormField
+        control={control}
+        name='premiumCalculation.totalPremium'
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Total Premium</FormLabel>
+            <FormControl>
+              <Input {...field} readOnly className='bg-muted font-bold' />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-      <div className='space-y-2'>
-        <label
-          htmlFor={register('premiumCalculation.discountCode').name}
-          className='text-primary block text-sm font-medium'
-        >
-          Discount Code (Optional)
-        </label>
-        <Input
-          id={register('premiumCalculation.discountCode').name}
-          {...register('premiumCalculation.discountCode')}
-          className='block w-full rounded-md border p-2'
-          placeholder='Enter discount code'
-        />
-        <p className='text-muted-foreground text-xs'>
-          Enter a valid discount code to receive a premium reduction
-        </p>
-      </div>
+      <FormField
+        control={control}
+        name='premiumCalculation.discountCode'
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Discount Code (Optional)</FormLabel>
+            <FormControl>
+              <Input {...field} placeholder='Enter discount code' />
+            </FormControl>
+            <FormMessage />
+            <p className='text-muted-foreground text-xs'>
+              Enter a valid discount code to receive a premium reduction
+            </p>
+          </FormItem>
+        )}
+      />
 
       <div className='bg-muted mt-6 rounded-md p-4'>
         <h3 className='mb-2 text-sm font-medium'>

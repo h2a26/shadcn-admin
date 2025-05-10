@@ -1,5 +1,12 @@
-import { Controller, useFormContext } from 'react-hook-form'
+import { useFormContext } from 'react-hook-form'
 import { Checkbox } from '@/components/ui/checkbox'
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form.tsx'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -13,9 +20,7 @@ import { ParcelCategory, ParcelDetails } from '@/features/proposal/data/schema'
 
 export function ParcelDetailsForm() {
   const {
-    register,
     control,
-    formState: { errors },
   } = useFormContext<{ parcelDetails: ParcelDetails }>()
 
   const parcelCategories: ParcelCategory[] = [
@@ -29,196 +34,169 @@ export function ParcelDetailsForm() {
 
   return (
     <div className='space-y-4 text-start'>
-      <div className='space-y-2'>
-        <label
-          htmlFor={register('parcelDetails.description').name}
-          className='text-primary block text-sm font-medium'
-        >
-          Description
-        </label>
-        <Textarea
-          id={register('parcelDetails.description').name}
-          {...register('parcelDetails.description')}
-          className='block w-full rounded-md border p-2'
-          placeholder='Describe the parcel contents'
-          rows={3}
-        />
-        {errors.parcelDetails?.description && (
-          <span className='text-destructive text-sm'>
-            {errors.parcelDetails.description.message}
-          </span>
+      <FormField
+        control={control}
+        name='parcelDetails.description'
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>
+              Description <span className='text-red-500'>*</span>
+            </FormLabel>
+            <FormControl>
+              <Textarea placeholder='Describe the parcel contents' {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
         )}
-      </div>
+      />
 
-      <div className='space-y-2'>
-        <label
-          htmlFor='parcelDetails.category'
-          className='text-primary block text-sm font-medium'
-        >
-          Category
-        </label>
-        <Controller
-          name='parcelDetails.category'
-          control={control}
-          render={({ field }) => (
+      <FormField
+        control={control}
+        name='parcelDetails.category'
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>
+              Category <span className='text-red-500'>*</span>
+            </FormLabel>
             <Select onValueChange={field.onChange} defaultValue={field.value}>
-              <SelectTrigger id='parcelDetails.category' className='w-full'>
-                <SelectValue placeholder='Select category' />
-              </SelectTrigger>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder='Select category' />
+                </SelectTrigger>
+              </FormControl>
               <SelectContent>
-                {parcelCategories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
+                        {parcelCategories.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
               </SelectContent>
             </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={control}
+        name='parcelDetails.declaredValue'
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>
+              Declared Value <span className='text-red-500'>*</span>
+            </FormLabel>
+            <FormControl>
+              <Input placeholder='Enter declared value' {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
+        <FormField
+          control={control}
+          name='parcelDetails.weightKg'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Weight (kg)</FormLabel>
+              <FormControl>
+                <Input placeholder='Weight' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
         />
-        {errors.parcelDetails?.category && (
-          <span className='text-destructive text-sm'>
-            {errors.parcelDetails.category.message}
-          </span>
-        )}
-      </div>
 
-      <div className='space-y-2'>
-        <label
-          htmlFor={register('parcelDetails.declaredValue').name}
-          className='text-primary block text-sm font-medium'
-        >
-          Declared Value
-        </label>
-        <Input
-          id={register('parcelDetails.declaredValue').name}
-          {...register('parcelDetails.declaredValue')}
-          className='block w-full rounded-md border p-2'
-          placeholder='Enter declared value'
-          type='number'
-          min='1'
-          step='0.01'
+        <FormField
+          control={control}
+          name='parcelDetails.lengthCm'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Length (cm)</FormLabel>
+              <FormControl>
+                <Input placeholder='Length' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        {errors.parcelDetails?.declaredValue && (
-          <span className='text-destructive text-sm'>
-            {errors.parcelDetails.declaredValue.message}
-          </span>
-        )}
       </div>
 
       <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
-        <div className='space-y-2'>
-          <label
-            htmlFor={register('parcelDetails.weightKg').name}
-            className='text-primary block text-sm font-medium'
-          >
-            Weight (kg)
-          </label>
-          <Input
-            id={register('parcelDetails.weightKg').name}
-            {...register('parcelDetails.weightKg')}
-            className='block w-full rounded-md border p-2'
-            placeholder='Weight'
-            type='number'
-            step='0.01'
-          />
-          {errors.parcelDetails?.weightKg && (
-            <span className='text-destructive text-sm'>
-              {errors.parcelDetails.weightKg.message}
-            </span>
-          )}
-        </div>
-
-        <div className='space-y-2'>
-          <label
-            htmlFor={register('parcelDetails.lengthCm').name}
-            className='text-primary block text-sm font-medium'
-          >
-            Length (cm)
-          </label>
-          <Input
-            id={register('parcelDetails.lengthCm').name}
-            {...register('parcelDetails.lengthCm')}
-            className='block w-full rounded-md border p-2'
-            placeholder='Length'
-            type='number'
-            step='0.1'
-          />
-        </div>
-
-        <div className='space-y-2'>
-          <label
-            htmlFor={register('parcelDetails.widthCm').name}
-            className='text-primary block text-sm font-medium'
-          >
-            Width (cm)
-          </label>
-          <Input
-            id={register('parcelDetails.widthCm').name}
-            {...register('parcelDetails.widthCm')}
-            className='block w-full rounded-md border p-2'
-            placeholder='Width'
-            type='number'
-            step='0.1'
-          />
-        </div>
-      </div>
-
-      <div className='space-y-2'>
-        <label
-          htmlFor={register('parcelDetails.heightCm').name}
-          className='text-primary block text-sm font-medium'
-        >
-          Height (cm)
-        </label>
-        <Input
-          id={register('parcelDetails.heightCm').name}
-          {...register('parcelDetails.heightCm')}
-          className='block w-full rounded-md border p-2'
-          placeholder='Height'
-          type='number'
-          step='0.1'
-        />
-      </div>
-
-      <div className='flex items-center space-x-2 pt-2'>
-        <Controller
-          name='parcelDetails.fragileItem'
+        <FormField
           control={control}
+          name='parcelDetails.widthCm'
           render={({ field }) => (
-            <Checkbox
-              id='parcelDetails.fragileItem'
-              checked={field.value}
-              onCheckedChange={field.onChange}
-            />
+            <FormItem>
+              <FormLabel>Width (cm)</FormLabel>
+              <FormControl>
+                <Input placeholder='Width' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
         />
-        <label
-          htmlFor='parcelDetails.fragileItem'
-          className='text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
-        >
-          Fragile Item
-        </label>
+
+        <FormField
+          control={control}
+          name='parcelDetails.heightCm'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Height (cm)</FormLabel>
+              <FormControl>
+                <Input placeholder='Height' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
 
-      <div className='flex items-center space-x-2'>
-        <Controller
-          name='parcelDetails.highRiskItem'
-          control={control}
-          render={({ field }) => (
-            <Checkbox
-              id='parcelDetails.highRiskItem'
-              checked={field.value}
-              onCheckedChange={field.onChange}
-            />
-          )}
-        />
-        <label
-          htmlFor='parcelDetails.highRiskItem'
-          className='text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
-        >
-          High Risk Item
-        </label>
-      </div>
+      <FormField
+        control={control}
+        name='parcelDetails.fragileItem'
+        render={({ field }) => (
+          <FormItem className='flex flex-row items-start space-x-3 space-y-0'>
+            <FormControl>
+              <Checkbox
+                id='parcelDetails.fragileItem'
+                checked={field.value}
+                onCheckedChange={field.onChange}
+              />
+            </FormControl>
+            <div className='space-y-1 leading-none'>
+              <FormLabel htmlFor='parcelDetails.fragileItem'>
+                Fragile Item
+              </FormLabel>
+            </div>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={control}
+        name='parcelDetails.highRiskItem'
+        render={({ field }) => (
+          <FormItem className='flex flex-row items-start space-x-3 space-y-0'>
+            <FormControl>
+              <Checkbox
+                id='parcelDetails.highRiskItem'
+                checked={field.value}
+                onCheckedChange={field.onChange}
+              />
+            </FormControl>
+            <div className='space-y-1 leading-none'>
+              <FormLabel htmlFor='parcelDetails.highRiskItem'>
+                High Risk Item
+              </FormLabel>
+            </div>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
     </div>
   )
 }

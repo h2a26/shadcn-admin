@@ -158,7 +158,7 @@ const defineStepper = <const Steps extends Stepperize.Step[]>(
                 type='button'
                 role='tab'
                 tabIndex={dataState !== 'inactive' ? 0 : -1}
-                className='rounded-full'
+                className='rounded-full size-7'
                 variant={dataState !== 'inactive' ? 'default' : 'secondary'}
                 size='icon'
                 aria-controls={`step-panel-${props.of}`}

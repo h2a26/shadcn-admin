@@ -18,10 +18,17 @@ export const parcelDetailsSchema = z.object({
   description: z.string().min(1, 'Description is required'),
   category: z.string().min(1, 'Category is required'),
   declaredValue: z
-    .number()
-    .min(1, 'Declared value must be greater than 0')
-    .or(z.string().regex(/^\d+$/).transform(Number))
-    .refine((val) => val > 0, 'Declared value must be greater than 0'),
+    .union([
+      z
+        .string()
+        .min(1, 'Declared value is required')
+        .regex(/^\d+$/, 'Declared value must be a valid number'),
+      z.number({ invalid_type_error: 'Declared value is required' }),
+    ])
+    .transform((val) => (typeof val === 'string' ? Number(val) : val))
+    .refine((val) => val > 0, {
+      message: 'Declared value must be greater than 0',
+    }),
   weightKg: z
     .number()
     .optional()
@@ -110,22 +117,55 @@ const fileSchema = z.object({
 })
 
 export const documentsConsentSchema = z.object({
-  identityDoc: fileSchema.optional().nullable(),
-  ownershipProof: fileSchema.optional().nullable(),
-  invoice: fileSchema.optional().nullable(),
+  identityDoc: fileSchema
+    .optional()
+    .nullable()
+    .refine(
+      (val) =>
+        !val || val.type.startsWith('image/') || val.type === 'application/pdf',
+      'Only image files or PDFs are allowed'
+    )
+    .refine(
+      (val) => !val || val.size <= 5 * 1024 * 1024, // Max 5MB
+      'File size must be less than 5MB'
+    ),
+  ownershipProof: fileSchema
+    .optional()
+    .nullable()
+    .refine(
+      (val) =>
+        !val || val.type.startsWith('image/') || val.type === 'application/pdf',
+      'Only image files or PDFs are allowed'
+    )
+    .refine(
+      (val) => !val || val.size <= 5 * 1024 * 1024,
+      'File size must be less than 5MB'
+    ),
+  invoice: fileSchema
+    .optional()
+    .nullable()
+    .refine(
+      (val) =>
+        !val || val.type.startsWith('image/') || val.type === 'application/pdf',
+      'Only image files or PDFs are allowed'
+    )
+    .refine(
+      (val) => !val || val.size <= 5 * 1024 * 1024,
+      'File size must be less than 5MB'
+    ),
   agreeTerms: z.boolean().refine((val) => val, 'You must agree to the terms'),
   confirmAccuracy: z
     .boolean()
     .refine((val) => val, 'You must confirm accuracy'),
 })
 
-
 export const workflowSubmitSchema = z.object({
   assignedTo: z.string().min(1, 'Assignee is required'),
   comments: z.string().optional(),
-  workflowStep: z.enum(['proposal', 'risk_review', 'approval'] as const).default('proposal'),
+  workflowStep: z
+    .enum(['proposal', 'risk_review', 'approval'] as const)
+    .default('proposal'),
 })
-
 
 export const proposalFormSchema = z.object({
   policyholderInfo: policyholderInfoSchema,
