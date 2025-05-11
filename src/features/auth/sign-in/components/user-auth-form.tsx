@@ -2,9 +2,12 @@ import { HTMLAttributes, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { IconBrandFacebook, IconBrandGithub } from '@tabler/icons-react'
+import { LoginRequestSchema } from '@/schemas/auth-schemas'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { useLogin } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -19,36 +22,31 @@ import { PasswordInput } from '@/components/password-input'
 
 type UserAuthFormProps = HTMLAttributes<HTMLFormElement>
 
-const formSchema = z.object({
-  email: z
-    .string()
-    .min(1, { message: 'Please enter your email' })
-    .email({ message: 'Invalid email address' }),
-  password: z
-    .string()
-    .min(1, {
-      message: 'Please enter your password',
-    })
-    .min(7, {
-      message: 'Password must be at least 7 characters long',
-    }),
-})
-
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState(false)
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof LoginRequestSchema>>({
+    resolver: zodResolver(LoginRequestSchema),
     defaultValues: {
       email: '',
       password: '',
     },
   })
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
+  const navigate = useNavigate()
+  const loginMutation = useLogin()
+
+  function onSubmit(data: z.infer<typeof LoginRequestSchema>) {
     setIsLoading(true)
-    // eslint-disable-next-line no-console
-    console.log(data)
+    loginMutation.mutate(data, {
+      onSuccess: () => {
+        toast.success('Login successful')
+        navigate({ to: '/' })
+      },
+      onError: () => {
+        toast.error('Login failed. Please try again.')
+      },
+    })
 
     setTimeout(() => {
       setIsLoading(false)
