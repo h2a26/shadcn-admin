@@ -4,6 +4,7 @@ import {
   LoginResponseSchema,
 } from '@/schemas/auth-schemas'
 import apiClient from './api-client'
+import { useAuthStore } from '@/stores/auth-store'
 
 export const login = async (
   credentials: LoginRequest
@@ -17,5 +18,10 @@ export const login = async (
 }
 
 export const logout = async (): Promise<void> => {
-  await apiClient.post('/auth/logout')
+  const email = useAuthStore.getState().user?.email
+  if (!email) {
+    throw new Error('User email not found in auth store')
+  }
+
+  await apiClient.post('/auth/logout', { email })
 }

@@ -49,9 +49,15 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 408 && !originalRequest._retry) {
       originalRequest._retry = true
       try {
+        const email = useAuthStore.getState().user?.email
+
+        if (!email) {
+          throw new Error('Email not found in auth store')
+        }
+
         const refreshResponse = await axios.post<ApiResponse<TokenResponse>>(
           '/auth/refresh',
-          {},
+          { email },
           { withCredentials: true }
         )
 
@@ -60,8 +66,8 @@ apiClient.interceptors.response.use(
           throw new Error('Invalid token response')
         }
 
-        const { accessToken, email } = parsed.data
-        const user = { email }
+        const { accessToken, email: parsedEmail } = parsed.data
+        const user = { email: parsedEmail }
         useAuthStore.getState().setAuth(accessToken, user)
 
         if (originalRequest.headers) {
