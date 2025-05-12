@@ -1,4 +1,6 @@
 import { Link, useNavigate } from '@tanstack/react-router'
+import { toast } from 'sonner'
+import { useLogout } from '@/hooks/use-auth'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -11,11 +13,8 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useLogout } from '@/hooks/use-auth'
-import { toast } from 'sonner'
 
 export function ProfileDropdown() {
-
   const logoutMutation = useLogout()
   const navigate = useNavigate()
 

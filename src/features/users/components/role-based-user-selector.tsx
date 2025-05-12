@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, useCallback } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
+import { getAuthStore } from '@/stores/auth-store'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -37,10 +38,14 @@ export function RoleBasedUserSelector({
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const { getRoles } = getAuthStore()
 
   const eligibleRoles = useMemo(
-    () => getRolesForWorkflowStep(workflowStep),
-    [workflowStep]
+    () =>
+      getRolesForWorkflowStep(workflowStep).filter((role) =>
+        getRoles().includes(role.id as RoleId)
+      ),
+    [workflowStep, getRoles]
   )
 
   const eligibleUsers = useMemo(() => {

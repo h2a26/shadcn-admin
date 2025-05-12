@@ -1,27 +1,36 @@
-import {
-  LoginRequest,
-  LoginResponse,
-  LoginResponseSchema,
-} from '@/schemas/auth-schemas'
+import { LoginRequest, LoginResponseSchema } from '@/schemas/auth-schemas'
+import { getAuthStore } from '@/stores/auth-store'
 import apiClient from './api-client'
-import { useAuthStore } from '@/stores/auth-store'
 
-export const login = async (
-  credentials: LoginRequest
-): Promise<LoginResponse> => {
-  const response = await apiClient.post('/auth/login', credentials)
-  const parsed = LoginResponseSchema.safeParse(response.data.data)
-  if (!parsed.success) {
-    throw new Error('Invalid login response')
+export const login = async (credentials: LoginRequest): Promise<void> => {
+  try {
+    const response = await apiClient.post('/auth/login', credentials)
+    const parsed = LoginResponseSchema.safeParse(response.data.data)
+    if (!parsed.success) {
+      throw new Error('Invalid login response')
+    }
+
+    const { accessToken } = parsed.data
+    await getAuthStore().login(accessToken)
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Login error:', error)
+    throw error
   }
-  return parsed.data
 }
 
 export const logout = async (): Promise<void> => {
-  const email = useAuthStore.getState().user?.email
-  if (!email) {
-    throw new Error('User email not found in auth store')
-  }
+  try {
+    const user = getAuthStore().user
+    if (!user) {
+      throw new Error('No user found in auth store')
+    }
 
-  await apiClient.post('/auth/logout', { email })
+    await apiClient.post('/auth/logout', { email: user.email })
+    getAuthStore().logout()
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Logout error:', error)
+    throw error
+  }
 }

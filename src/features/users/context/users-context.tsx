@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { getAuthStore } from '@/stores/auth-store'
 import useDialogState from '@/hooks/use-dialog-state'
 import { RoleId } from '../config/roles'
 import { User } from '../data/schema'
@@ -32,6 +33,7 @@ export default function UsersProvider({ children }: Props) {
   const [currentRow, setCurrentRow] = useState<User | null>(null)
   const [users, setUsers] = useState<User[]>([])
   const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const { hasRole } = getAuthStore()
 
   // Load users on mount
   useEffect(() => {
@@ -47,6 +49,9 @@ export default function UsersProvider({ children }: Props) {
 
   // Function to get users by role
   const getUsersByRoleFunction = (role: RoleId) => {
+    if (!hasRole('users.view')) {
+      return []
+    }
     return getUsersByRole(role)
   }
 

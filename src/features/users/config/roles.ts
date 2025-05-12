@@ -158,9 +158,11 @@ export function canBeAssignedToStep(roleId: string, stepId: string): boolean {
 }
 
 // Helper function to get all roles that can be assigned to a specific workflow step
-export function getRolesForWorkflowStep(stepId: string): Role[] {
+export function getRolesForWorkflowStep(step: string): Role[] {
   return rolesConfig.filter(
-    (role) => role.workflowSteps && role.workflowSteps.includes(stepId)
+    (role) =>
+      role.workflowSteps?.includes(step) &&
+      role.permissions.includes('workflow.assign')
   )
 }
 

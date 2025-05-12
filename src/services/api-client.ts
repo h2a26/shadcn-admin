@@ -5,8 +5,10 @@ import axios, {
   InternalAxiosRequestConfig,
 } from 'axios'
 import { LoginResponseSchema } from '@/schemas/auth-schemas'
+import { jwtDecode } from 'jwt-decode'
 import { toast } from 'sonner'
-import { useAuthStore } from '@/stores/auth-store'
+import { getAuthStore } from '@/stores/auth-store'
+import { JwtPayload } from '@/stores/auth-store'
 
 interface ApiResponse<T> {
   timeStamp: string
@@ -28,7 +30,8 @@ const apiClient: AxiosInstance = axios.create({
 
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
-    const token = useAuthStore.getState().accessToken
+    const store = getAuthStore()
+    const token = store.user?.token
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -49,15 +52,15 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 408 && !originalRequest._retry) {
       originalRequest._retry = true
       try {
-        const email = useAuthStore.getState().user?.email
-
-        if (!email) {
-          throw new Error('Email not found in auth store')
+        const store = getAuthStore()
+        const user = store.user
+        if (!user) {
+          throw new Error('No user found in auth store')
         }
 
         const refreshResponse = await axios.post<ApiResponse<TokenResponse>>(
           '/auth/refresh',
-          { email },
+          { email: user.email },
           { withCredentials: true }
         )
 
@@ -66,9 +69,12 @@ apiClient.interceptors.response.use(
           throw new Error('Invalid token response')
         }
 
-        const { accessToken, email: parsedEmail } = parsed.data
-        const user = { email: parsedEmail }
-        useAuthStore.getState().setAuth(accessToken, user)
+        const { accessToken } = parsed.data
+        const decoded = jwtDecode<JwtPayload>(accessToken)
+        if (decoded.typ !== 'Access') {
+          throw new Error('Invalid token type. Expected Access token')
+        }
+        await store.login(accessToken)
 
         if (originalRequest.headers) {
           originalRequest.headers.Authorization = `Bearer ${accessToken}`
@@ -77,7 +83,8 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest)
       } catch (refreshError) {
         toast.error('Session expired. Please login again.')
-        useAuthStore.getState().reset()
+        const store = getAuthStore()
+        store.logout()
         window.location.href = '/sign-in'
         return Promise.reject(refreshError)
       }

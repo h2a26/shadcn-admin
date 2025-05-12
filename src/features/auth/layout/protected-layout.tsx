@@ -1,0 +1,49 @@
+import { ReactNode } from 'react'
+import { useRouter } from '@tanstack/react-router'
+import { Loader2 } from 'lucide-react'
+import { getAuthStore } from '@/stores/auth-store'
+import { RoleId } from '@/features/users/config/roles'
+
+interface ProtectedLayoutProps {
+  children: ReactNode
+  requiredRoles?: RoleId[]
+}
+
+export function ProtectedLayout({
+  children,
+  requiredRoles,
+}: ProtectedLayoutProps) {
+  const store = getAuthStore()
+  const router = useRouter()
+
+  if (store.isLoading) {
+    return (
+      <div className='flex min-h-screen items-center justify-center'>
+        <Loader2 className='h-8 w-8 animate-spin' />
+      </div>
+    )
+  }
+
+  if (!store.isAuthenticated) {
+    router.navigate({
+      to: '/sign-in',
+      replace: true,
+    })
+    return null
+  }
+
+  if (requiredRoles && requiredRoles.length > 0) {
+    const hasRequiredRole = requiredRoles.some((role) =>
+      store.user?.roles?.includes(role)
+    )
+    if (!hasRequiredRole) {
+      router.navigate({
+        to: '/403',
+        replace: true,
+      })
+      return null
+    }
+  }
+
+  return <>{children}</>
+}
