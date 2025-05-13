@@ -7,8 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import AuthLayout from '../auth-layout'
 import { OtpForm } from './components/otp-form'
+import { AuthLayout } from '@/features/auth/layout/auth-layout.tsx'
 
 export default function Otp() {
   return (

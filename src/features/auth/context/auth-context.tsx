@@ -8,8 +8,6 @@ interface AuthContextType {
   user: {
     email: string
     roles: RoleId[]
-    token: string
-    tokenType: 'Access' | 'Refresh'
   } | null
   hasRole: (role: RoleId) => boolean
   getRoles: () => RoleId[]
@@ -17,7 +15,11 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthContextProvider({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   const store = getAuthStore()
 
   const value = {

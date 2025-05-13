@@ -7,7 +7,7 @@ import { IconBrandFacebook, IconBrandGithub } from '@tabler/icons-react'
 import { LoginRequestSchema } from '@/schemas/auth-schemas'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { useLogin } from '@/hooks/use-auth'
+import { useLogin } from '@/features/auth/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -40,7 +40,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     setIsLoading(true)
     loginMutation.mutate(data, {
       onSuccess: () => {
-        toast.success('Login successful')
         navigate({ to: '/' })
       },
       onError: () => {

@@ -28,6 +28,7 @@ export interface AuthState {
   refresh: () => Promise<void>
   getRoles: () => RoleId[]
   hasRole: (role: RoleId) => boolean
+  reset: () => void
 }
 
 const authStore = create<AuthState>(
@@ -93,6 +94,14 @@ const authStore = create<AuthState>(
     hasRole: (role: RoleId): boolean => {
       const user = get().user
       return user ? user.roles.includes(role) : false
+    },
+
+    reset: () => {
+      set({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false
+      })
     },
   })
 )
