@@ -22,7 +22,7 @@ import { PasswordInput } from '@/components/password-input'
 
 type UserAuthFormProps = HTMLAttributes<HTMLFormElement>
 
-export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
+export function SignInForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<z.infer<typeof LoginRequestSchema>>({
@@ -91,7 +91,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             </FormItem>
           )}
         />
-        <Button className='mt-2' disabled={isLoading}>
+        <Button className='mt-4' disabled={isLoading}>
           Login
         </Button>
 
