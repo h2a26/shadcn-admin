@@ -7,8 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { ForgotPasswordForm } from './components/forgot-password-form'
 import { AuthLayout } from '@/features/auth/layout/auth-layout.tsx'
+import { ForgotPasswordForm } from './components/forgot-password-form'
 
 export default function ForgotPassword() {
   return (

@@ -1,5 +1,5 @@
-import { createContext, useContext } from 'react'
-import { getAuthStore } from '@/stores/auth-store'
+import React, { createContext, useContext } from 'react'
+import { useAuthStore } from '@/stores/auth-store'
 import { RoleId } from '@/features/users/config/roles'
 
 interface AuthContextType {
@@ -20,7 +20,7 @@ export function AuthContextProvider({
 }: {
   children: React.ReactNode
 }) {
-  const store = getAuthStore()
+  const store = useAuthStore()
 
   const value = {
     isAuthenticated: store.isAuthenticated,

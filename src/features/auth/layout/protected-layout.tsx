@@ -1,7 +1,7 @@
 import { ReactNode, useEffect } from 'react'
 import { useRouter } from '@tanstack/react-router'
 import { Loader2 } from 'lucide-react'
-import { getAuthStore } from '@/stores/auth-store'
+import { useAuthStore } from '@/stores/auth-store'
 import { RoleId } from '@/features/users/config/roles'
 
 interface ProtectedLayoutProps {
@@ -13,7 +13,7 @@ export function ProtectedLayout({
   children,
   requiredRoles,
 }: ProtectedLayoutProps) {
-  const store = getAuthStore()
+  const store = useAuthStore()
   const router = useRouter()
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export function ProtectedLayout({
         })
       }
     }
-  }, [store.isAuthenticated, store.user, requiredRoles])
+  }, [store.isAuthenticated, store.user, requiredRoles, router])
 
   if (store.isLoading) {
     return (

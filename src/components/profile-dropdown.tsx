@@ -1,5 +1,7 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
+import { useAuthStore } from '@/stores/auth-store'
+import { getAvatarName } from '@/utils/avatar'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,16 +14,13 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useLogout } from '@/features/auth/hooks/use-auth.ts'
-import { getAuthStore } from '@/stores/auth-store.ts'
-import { getAvatarName } from '@/utils/avatar.ts'
+import { useLogout } from '@/features/auth/hooks/use-auth'
 
 export function ProfileDropdown() {
   const logoutMutation = useLogout()
   const navigate = useNavigate()
 
-  const store = getAuthStore()
-  const user = store.user
+  const user = useAuthStore().user
 
   const handleLogout = async () => {
     try {

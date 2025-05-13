@@ -1,14 +1,14 @@
 import { ReactNode } from 'react'
 import { useRouter } from '@tanstack/react-router'
 import { Loader2 } from 'lucide-react'
-import { getAuthStore } from '@/stores/auth-store'
+import { useAuthStore } from '@/stores/auth-store'
 
 interface AuthLayoutProps {
   children: ReactNode
 }
 
 export function AuthLayout({ children }: AuthLayoutProps) {
-  const store = getAuthStore()
+  const store = useAuthStore()
   const router = useRouter()
 
   if (store.isLoading) {

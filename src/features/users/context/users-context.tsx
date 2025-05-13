@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { getAuthStore } from '@/stores/auth-store'
+import { useAuthStore } from '@/stores/auth-store'
 import useDialogState from '@/hooks/use-dialog-state'
 import { RoleId } from '../config/roles'
 import { User } from '../data/schema'
@@ -33,7 +33,7 @@ export default function UsersProvider({ children }: Props) {
   const [currentRow, setCurrentRow] = useState<User | null>(null)
   const [users, setUsers] = useState<User[]>([])
   const [currentUser, setCurrentUser] = useState<User | null>(null)
-  const { hasRole } = getAuthStore()
+  const { hasRole } = useAuthStore()
 
   // Load users on mount
   useEffect(() => {

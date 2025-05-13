@@ -8,7 +8,7 @@ import {
 } from '@tanstack/react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { toast } from 'sonner'
-import { getAuthStore } from '@/stores/auth-store'
+import { useAuthStore as authStore } from '@/stores/auth-store'
 import { handleServerError } from '@/utils/handle-server-error'
 import { AuthProvider } from '@/features/auth/providers/auth-provider'
 import { FontProvider } from './context/font-context'
@@ -52,7 +52,7 @@ const queryClient = new QueryClient({
       if (error instanceof AxiosError) {
         if (error.response?.status === 401) {
           toast.error('Session expired!')
-          getAuthStore().logout()
+          authStore().logout()
           const redirect = `${router.history.location.href}`
           router.navigate({ to: '/sign-in', search: { redirect } })
         }

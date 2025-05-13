@@ -1,8 +1,8 @@
 import { ReactNode } from 'react'
+import { useLocation } from '@tanstack/react-router'
 import { authConfig } from '../config/auth-config'
 import { AuthLayout } from './auth-layout'
 import { ProtectedLayout } from './protected-layout'
-import { useLocation } from '@tanstack/react-router'
 
 interface RootLayoutProps {
   children: ReactNode

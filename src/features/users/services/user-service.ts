@@ -2,7 +2,6 @@
  * User service for managing user data
  * Currently uses local storage, but designed to be easily replaceable with API calls
  */
-import { getAuthStore } from '@/stores/auth-store'
 import { RoleId } from '../config/roles'
 import { User } from '../data/schema'
 
@@ -74,7 +73,6 @@ function initializeUserStorage(): void {
  * Get all users from storage
  */
 export function getAllUsers(): User[] {
-  const { hasRole } = getAuthStore()
   initializeUserStorage()
   try {
     const usersJson = localStorage.getItem(USER_STORAGE_KEY)
@@ -95,11 +93,6 @@ export function getAllUsers(): User[] {
         updatedAt: new Date(user.updatedAt),
       })
     )
-
-    // Filter users based on permissions
-    if (!hasRole('users.view')) {
-      return []
-    }
 
     return users
   } catch (error) {

@@ -7,7 +7,6 @@ import { IconBrandFacebook, IconBrandGithub } from '@tabler/icons-react'
 import { LoginRequestSchema } from '@/schemas/auth-schemas'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { useLogin } from '@/features/auth/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -19,6 +18,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
+import { useLogin } from '@/features/auth/hooks/use-auth'
 
 type UserAuthFormProps = HTMLAttributes<HTMLFormElement>
 

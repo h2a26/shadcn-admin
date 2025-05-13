@@ -7,8 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { SignUpForm } from './components/sign-up-form'
 import { AuthLayout } from '@/features/auth/layout/auth-layout.tsx'
+import { SignUpForm } from './components/sign-up-form'
 
 export default function SignUp() {
   return (

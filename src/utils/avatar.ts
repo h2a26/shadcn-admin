@@ -1,9 +1,7 @@
 export function getAvatarName(username?: string | null): string {
   if (!username) return '??'
 
-  const normalized = username
-    .trim()
-    .replace(/[^\p{L}\s]/gu, '') // Keep only letters and whitespace
+  const normalized = username.trim().replace(/[^\p{L}\s]/gu, '') // Keep only letters and whitespace
 
   if (!normalized) return '??'
 
