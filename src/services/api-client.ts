@@ -69,12 +69,12 @@ apiClient.interceptors.response.use(
           throw new Error('Invalid token response')
         }
 
-        const { accessToken } = parsed.data
+        const { accessToken, username } = parsed.data
         const decoded = jwtDecode<JwtPayload>(accessToken)
         if (decoded.typ !== 'Access') {
           throw new Error('Invalid token type. Expected Access token')
         }
-        await store.login(accessToken)
+        await store.login(accessToken, username)
 
         if (originalRequest.headers) {
           originalRequest.headers.Authorization = `Bearer ${accessToken}`

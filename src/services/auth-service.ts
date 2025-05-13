@@ -9,9 +9,9 @@ export const login = async (credentials: LoginRequest): Promise<void> => {
     if (!parsed.success) {
       throw new Error('Invalid login response')
     }
+    const { accessToken, username } = parsed.data;
 
-    const { accessToken } = parsed.data
-    await getAuthStore().login(accessToken)
+    await getAuthStore().login(accessToken, username)
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Login error:', error)

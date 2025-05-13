@@ -13,6 +13,7 @@ export interface JwtPayload {
 }
 
 export interface User {
+  username: string
   email: string
   roles: RoleId[]
   token: string
@@ -23,7 +24,7 @@ export interface AuthState {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (token: string) => Promise<void>
+  login: (token: string, username: string) => Promise<void>
   logout: () => void
   refresh: () => Promise<void>
   getRoles: () => RoleId[]
@@ -37,12 +38,13 @@ const authStore = create<AuthState>(
     isAuthenticated: false,
     isLoading: false,
 
-    login: async (token: string) => {
+    login: async (token: string, username: string) => {
       set({ isLoading: true })
       try {
         const decoded = jwtDecode<JwtPayload>(token)
         const roles = decoded.rol ? decoded.rol.split(',') : []
         const user = {
+          username: username,
           email: decoded.sub,
           roles: roles as RoleId[],
           token: token,
@@ -74,11 +76,12 @@ const authStore = create<AuthState>(
           email: user.email,
         })
         const token = response.data.data.accessToken
+        const username = response.data.data.username
         const decoded = jwtDecode<JwtPayload>(token)
         if (decoded.typ !== 'Access') {
           throw new Error('Invalid token type. Expected Access token')
         }
-        await get().login(token)
+        await get().login(token, username)
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Error refreshing token:', error)
