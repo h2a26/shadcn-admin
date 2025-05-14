@@ -1,28 +1,19 @@
 import { RoleId } from '@/features/users/config/roles'
 
 export interface AuthConfig {
-  // Public routes that don't require authentication
   publicRoutes: string[]
-
-  // Default redirect paths
   defaultRedirect: {
     authenticated: string
     unauthenticated: string
   }
-
-  // Role-based access control configuration
-  roleBasedAccess: {
-    [key: string]: RoleId[]
-  }
-
-  // Token configuration
+  roleBasedAccess: Record<string, RoleId[]>
   token: {
     access: {
-      maxAge: number // in seconds
-      refreshInterval: number // in seconds
+      maxAge: number
+      refreshInterval: number
     }
     refresh: {
-      maxAge: number // in seconds
+      maxAge: number
     }
   }
 }
@@ -33,12 +24,10 @@ export const authConfig: AuthConfig = {
     '/(auth)/sign-up',
     '/(auth)/forgot-password',
   ],
-
   defaultRedirect: {
     authenticated: '/_authenticated',
     unauthenticated: '/(auth)/sign-in',
   },
-
   roleBasedAccess: {
     '/_authenticated/workflow': ['ROLE_ADMIN', 'ROLE_UNDERWRITER'],
     '/_authenticated/proposal': [
@@ -49,14 +38,13 @@ export const authConfig: AuthConfig = {
     '/_authenticated/users': ['ROLE_ADMIN'],
     '/_authenticated/settings': ['ROLE_ADMIN', 'ROLE_MANAGER'],
   },
-
   token: {
     access: {
-      maxAge: 900, // 15 minutes
-      refreshInterval: 300, // 5 minutes
+      maxAge: 900,
+      refreshInterval: 300,
     },
     refresh: {
-      maxAge: 86400, // 24 hours
+      maxAge: 86400,
     },
   },
 }

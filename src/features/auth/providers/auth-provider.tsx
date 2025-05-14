@@ -5,6 +5,6 @@ interface AuthProviderProps {
   children: ReactNode
 }
 
-export function AuthProvider({ children }: AuthProviderProps) {
-  return <AuthContextProvider>{children}</AuthContextProvider>
-}
+export const AuthProvider = ({ children }: AuthProviderProps) => (
+  <AuthContextProvider>{children}</AuthContextProvider>
+)

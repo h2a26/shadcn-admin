@@ -2,7 +2,7 @@ import React, { createContext, useContext } from 'react'
 import { useAuthStore } from '@/stores/auth-store'
 import { RoleId } from '@/features/users/config/roles'
 
-interface AuthContextType {
+export interface AuthContextType {
   isAuthenticated: boolean
   isLoading: boolean
   user: {
@@ -15,29 +15,22 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export function AuthContextProvider({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const store = useAuthStore()
+export const useAuthContext = (): AuthContextType => {
+  const context = useContext(AuthContext)
+  if (!context) throw new Error('useAuthContext must be used within AuthProvider')
+  return context
+}
+
+export const AuthContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated, isLoading, user, hasRole, getRoles } = useAuthStore()
 
   const value = {
-    isAuthenticated: store.isAuthenticated,
-    isLoading: store.isLoading,
-    user: store.user,
-    hasRole: store.hasRole,
-    getRoles: store.getRoles,
+    isAuthenticated,
+    isLoading,
+    user,
+    hasRole,
+    getRoles,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-}
-
-// eslint-disable-next-line react-refresh/only-export-components
-export function useAuth() {
-  const context = useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
-  return context
 }
