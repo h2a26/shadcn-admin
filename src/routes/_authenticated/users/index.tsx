@@ -1,11 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
-import Users from '@/features/users'
 import { RouteStaticData } from '@/types/route-data.ts'
+import Users from '@/features/users'
 
-export const Route = createFileRoute('/_authenticated/users/')<RouteStaticData>({
-  component: Users,
-  staticData: {
-    isPublic: false,
-    requiredRoles: ['ROLE_ADMIN'],
-  },
-})
+export const Route = createFileRoute('/_authenticated/users/')<RouteStaticData>(
+  {
+    component: Users,
+    staticData: {
+      isPublic: false,
+      requiredRoles: ['ROLE_ADMIN'],
+    },
+  }
+)

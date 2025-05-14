@@ -1,7 +1,7 @@
 import { AuthState, User } from '@/types/auth-types'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { parseJwt, extractRoles } from '@/utils/jwt-utils'
+import { extractAuthorities, parseJwt } from '@/utils/jwt-utils'
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -14,12 +14,13 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true })
         try {
           const decoded = parseJwt(token)
-          const roles = extractRoles(decoded)
+          const { roles, permissions } = extractAuthorities(decoded)
 
           const user: User = {
             username,
             email: decoded.sub,
             roles,
+            permissions,
             token,
             tokenType: decoded.typ,
           }
@@ -40,6 +41,11 @@ export const useAuthStore = create<AuthState>()(
       getRoles: () => get().user?.roles ?? [],
 
       hasRole: (role) => get().user?.roles.includes(role) ?? false,
+
+      getPermissions: () => get().user?.roles ?? [],
+
+      hasPermission: (permission) =>
+        get().user?.permissions.includes(permission) ?? false,
 
       reset: () =>
         set({ user: null, isAuthenticated: false, isLoading: false }),

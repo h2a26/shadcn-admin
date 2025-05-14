@@ -23,7 +23,11 @@ const queryClient = new QueryClient({
         // eslint-disable-next-line no-console
         if (import.meta.env.DEV) console.log({ failureCount, error })
         if (import.meta.env.PROD && failureCount > 3) return false
-        if (error instanceof AxiosError && [401, 403].includes(error.response?.status ?? 0)) return false
+        if (
+          error instanceof AxiosError &&
+          [401, 403].includes(error.response?.status ?? 0)
+        )
+          return false
         return true
       },
       refetchOnWindowFocus: import.meta.env.PROD,

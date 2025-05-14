@@ -9,7 +9,10 @@ interface ProtectedLayoutProps {
   requiredRoles?: RoleId[]
 }
 
-export const ProtectedLayout = ({ children, requiredRoles }: ProtectedLayoutProps) => {
+export const ProtectedLayout = ({
+  children,
+  requiredRoles,
+}: ProtectedLayoutProps) => {
   const { isLoading, isAuthenticated, user } = useAuthContext()
   const router = useRouter()
 

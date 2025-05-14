@@ -12,12 +12,6 @@ export const permissionSchema = z.enum([
   'users.update',
   'users.delete',
 
-  // Proposal permissions
-  'proposals.view',
-  'proposals.create',
-  'proposals.update',
-  'proposals.delete',
-
   // Workflow permissions
   'workflow.view',
   'workflow.assign',
@@ -28,8 +22,6 @@ export const permissionSchema = z.enum([
   // Admin permissions
   'admin.settings',
   'admin.roles',
-  'admin.workflow',
-  'admin.reports',
 ])
 
 export type Permission = z.infer<typeof permissionSchema>
@@ -54,10 +46,6 @@ export const rolesConfig: Role[] = [
       'users.create',
       'users.update',
       'users.delete',
-      'proposals.view',
-      'proposals.create',
-      'proposals.update',
-      'proposals.delete',
       'workflow.view',
       'workflow.assign',
       'workflow.transition',
@@ -65,8 +53,6 @@ export const rolesConfig: Role[] = [
       'workflow.sendBack',
       'admin.settings',
       'admin.roles',
-      'admin.workflow',
-      'admin.reports',
     ],
     workflowSteps: ['proposal', 'risk_review', 'approval'],
   },
@@ -78,10 +64,8 @@ export const rolesConfig: Role[] = [
       'users.view',
       'users.create',
       'users.update',
-      'proposals.view',
       'workflow.view',
       'admin.settings',
-      'admin.reports',
     ],
     workflowSteps: [],
   },
@@ -91,10 +75,8 @@ export const rolesConfig: Role[] = [
     description: 'Department manager with oversight capabilities',
     permissions: [
       'users.view',
-      'proposals.view',
       'workflow.view',
       'workflow.reassign',
-      'admin.reports',
     ],
     workflowSteps: [],
   },
@@ -103,9 +85,6 @@ export const rolesConfig: Role[] = [
     name: 'Underwriter',
     description: 'Creates and processes insurance proposals',
     permissions: [
-      'proposals.view',
-      'proposals.create',
-      'proposals.update',
       'workflow.view',
       'workflow.assign',
     ],
@@ -116,8 +95,6 @@ export const rolesConfig: Role[] = [
     name: 'Risk Reviewer',
     description: 'Reviews and assesses risk for insurance proposals',
     permissions: [
-      'proposals.view',
-      'proposals.update',
       'workflow.view',
       'workflow.transition',
       'workflow.sendBack',
@@ -128,14 +105,14 @@ export const rolesConfig: Role[] = [
     id: 'approver',
     name: 'Approver',
     description: 'Final approval authority for insurance proposals',
-    permissions: ['proposals.view', 'workflow.view', 'workflow.transition'],
+    permissions: ['workflow.view', 'workflow.transition'],
     workflowSteps: ['approval'],
   },
   {
     id: 'cashier',
     name: 'Cashier',
     description: 'Handles financial transactions',
-    permissions: ['proposals.view'],
+    permissions: ['workflow.view'],
     workflowSteps: [],
   },
 ]
@@ -168,3 +145,4 @@ export function getRolesForWorkflowStep(step: string): Role[] {
 
 // Export the role IDs as a union type
 export type RoleId = (typeof rolesConfig)[number]['id']
+export type PermissionId = (typeof rolesConfig)[number]['id']

@@ -11,6 +11,7 @@ export interface User {
   username: string
   email: string
   roles: string[]
+  permissions: string[]
   token: string
   tokenType: 'Access' | 'Refresh'
 }
@@ -23,5 +24,7 @@ export interface AuthState {
   logout: () => void
   getRoles: () => string[]
   hasRole: (role: string) => boolean
+  getPermissions: () => string[]
+  hasPermission: (permission: string) => boolean
   reset: () => void
 }

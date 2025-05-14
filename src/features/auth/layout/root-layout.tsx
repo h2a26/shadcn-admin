@@ -1,9 +1,9 @@
 import { ReactNode } from 'react'
 import { useMatches } from '@tanstack/react-router'
+import { RouteStaticData } from '@/types/route-data.ts'
+import { RoleId } from '@/features/users/config/roles.ts'
 import { AuthLayout } from './auth-layout'
 import { ProtectedLayout } from './protected-layout'
-import { RoleId } from '@/features/users/config/roles.ts'
-import { RouteStaticData } from '@/types/route-data.ts'
 
 interface RootLayoutProps {
   children: ReactNode
@@ -18,6 +18,9 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
   const isPublic = staticData?.isPublic ?? false
   const requiredRoles: RoleId[] = staticData?.requiredRoles ?? []
 
-  return isPublic ? <AuthLayout>{children}</AuthLayout> : <ProtectedLayout requiredRoles={requiredRoles}>{children}</ProtectedLayout>
+  return isPublic ? (
+    <AuthLayout>{children}</AuthLayout>
+  ) : (
+    <ProtectedLayout requiredRoles={requiredRoles}>{children}</ProtectedLayout>
+  )
 }
-
