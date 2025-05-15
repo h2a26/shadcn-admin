@@ -18,9 +18,15 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
   const isPublic = staticData?.isPublic ?? false
   const requiredRoles: RoleId[] = staticData?.requiredRoles ?? []
 
-  return isPublic ? (
-    <AuthLayout>{children}</AuthLayout>
-  ) : (
-    <ProtectedLayout requiredRoles={requiredRoles}>{children}</ProtectedLayout>
+  return (
+    <>
+      {
+        isPublic ? (
+          <AuthLayout>{children}</AuthLayout>
+        ) : (
+          <ProtectedLayout requiredRoles={requiredRoles}>{children}</ProtectedLayout>
+        )
+      }
+    </>
   )
 }
